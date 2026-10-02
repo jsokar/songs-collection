@@ -1,0 +1,1160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Song Collection Hub — Classroom Music &amp; Stories Video Library</title>
+<!-- Tailwind CSS v3 with Plugins -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Custom Configuration -->
+<script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            serif: ['"Playfair Display"', 'Georgia', 'serif'],
+            sans: ['"Plus Jakarta Sans"', 'Inter', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          },
+          colors: {
+            forest: {
+              950: '#031913',
+              900: '#04221a',
+              850: '#062c22',
+              800: '#083a2d',
+              700: '#064e3b',
+              600: '#059669',
+              500: '#10b981',
+              400: '#34d399',
+            },
+          }
+        }
+      }
+    }
+</script>
+<!-- Google Fonts: Playfair Display & Plus Jakarta Sans -->
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎵</text></svg>">
+<style>
+    html, body {
+      overflow-x: hidden;
+      width: 100%;
+      min-width: 0;
+    }
+    .card-light-sheen {
+      background: #FFFFFF;
+      border: 1px solid #E2E8F0;
+      box-shadow: 0 2px 8px -2px rgba(15, 23, 42, 0.04);
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .card-light-sheen:hover {
+      transform: translateY(-2px);
+      border-color: #34D399;
+      box-shadow: 0 12px 24px -8px rgba(6, 78, 59, 0.12);
+    }
+
+    /* Video Player Box & Scaled Desktop Viewport */
+    #videoContainerWrap {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 16/9;
+      background: #000000;
+      border-radius: 16px;
+      overflow: hidden;
+    }
+    #videoIframe {
+      position: absolute;
+      top: 0;
+      left: 0;
+      border: none;
+      transform-origin: 0 0;
+    }
+
+    #videoContainerWrap:fullscreen,
+    #videoContainerWrap:-webkit-full-screen,
+    #videoContainerWrap:-moz-full-screen {
+      width: 100vw !important;
+      height: 100vh !important;
+      max-width: 100vw !important;
+      max-height: 100vh !important;
+      background: #000000 !important;
+      border-radius: 0 !important;
+      border: none !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+    }
+    #videoContainerWrap:fullscreen iframe,
+    #videoContainerWrap:-webkit-full-screen iframe {
+      width: 100% !important;
+      height: 100% !important;
+      max-width: 100% !important;
+      max-height: 100% !important;
+      transform: none !important;
+    }
+
+    ::-webkit-scrollbar {
+      width: 5px;
+      height: 5px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(52, 211, 153, 0.25);
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(52, 211, 153, 0.45);
+    }
+    .line-clamp-2 {
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    /* Responsive Mobile Sidebar Slide-in */
+    @media (max-width: 1023px) {
+      #appSidebar {
+        position: fixed;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        z-index: 50;
+        transform: translateX(-100%);
+        transition: transform 0.25s ease-in-out;
+      }
+      #appSidebar.open {
+        transform: translateX(0);
+      }
+      #sidebarBackdrop.open {
+        display: block !important;
+      }
+    }
+</style>
+</head>
+<body class="bg-[#F4F6F9] text-slate-800 font-sans antialiased min-h-screen flex selection:bg-emerald-600 selection:text-white">
+
+<!-- Mobile Sidebar Backdrop -->
+<div id="sidebarBackdrop" onclick="toggleMobileSidebar()" style="display:none;" class="fixed inset-0 bg-black/60 backdrop-blur-xs z-40 lg:hidden"></div>
+
+<!-- BEGIN: NavigationSidebar (Compact Forest Green) -->
+<aside id="appSidebar" class="w-64 xl:w-72 bg-forest-950 text-emerald-100/90 flex-shrink-0 flex flex-col justify-between border-r border-emerald-900/60 lg:sticky top-0 h-screen select-none z-30" data-purpose="app-sidebar">
+  <div class="p-3.5 sm:p-4 overflow-y-auto flex-1 flex flex-col justify-between">
+    <div>
+      <!-- Brand Identity Header with White Text Icon -->
+      <div class="mb-3.5 flex items-center justify-between cursor-pointer" onclick="goToCatalog()" data-purpose="brand-header">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-md shadow-emerald-500/25 text-white text-lg font-bold flex-shrink-0 select-none">
+            ♫
+          </div>
+          <div>
+            <h1 class="font-serif text-base xl:text-lg font-bold text-white tracking-wide leading-tight">Song Collection</h1>
+            <p class="text-[10px] text-emerald-400 font-medium">173 Videos &bull; 0 Duplicates</p>
+          </div>
+        </div>
+        <!-- Close drawer on mobile -->
+        <button onclick="event.stopPropagation(); toggleMobileSidebar();" class="lg:hidden p-1 text-emerald-300 hover:text-white text-base" title="Close Menu">
+          ✕
+        </button>
+      </div>
+
+      <!-- Quick Search Input in Sidebar -->
+      <div class="mb-3 relative" data-purpose="quick-search">
+        <div class="absolute inset-y-0 left-0 pl-2.5 flex items-center pointer-events-none text-emerald-500">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+        </div>
+        <input id="sidebarSearch" oninput="handleSearch(this.value)" class="w-full pl-8 pr-7 py-1.5 text-xs bg-forest-900 border border-emerald-800/60 rounded-lg text-emerald-100 placeholder-emerald-600/70 focus:outline-none focus:border-emerald-400 focus:ring-1 focus:ring-emerald-400 transition" placeholder="Search 173 songs &amp; stories..." type="text">
+        <button id="clearSearchBtn" onclick="clearSearch()" style="display:none;" class="absolute inset-y-0 right-0 pr-2 flex items-center text-emerald-400 hover:text-white text-xs" title="Clear Search">
+          ✕
+        </button>
+      </div>
+
+      <!-- Collection Deck Filter -->
+      <div class="mb-3" data-purpose="filter-collection-source">
+        <div class="flex items-center justify-between px-2 mb-1.5">
+          <h3 class="text-[10px] uppercase font-bold text-emerald-500/80 tracking-wider">Collections</h3>
+          <span class="text-[9px] text-emerald-600 font-mono">8 Decks</span>
+        </div>
+        <nav class="space-y-0.5">
+          <button id="tabSourceAll" data-source="all" onclick="setFilterSource('all')" class="w-full flex items-center justify-between px-2.5 py-1 text-xs font-medium rounded-lg bg-emerald-600/20 border-l-2 border-emerald-400 text-emerald-200 transition text-left cursor-pointer">
+            <div class="flex items-center gap-2">
+              <span class="text-xs">✨</span>
+              <span>All Collections</span>
+            </div>
+            <span class="text-[10px] font-semibold bg-emerald-950 text-emerald-300 px-1.5 py-0.2 rounded-full border border-emerald-800/40">173</span>
+          </button>
+
+          <button id="tabSource_Collection_1" data-source="Collection 1" onclick="setFilterSource('Collection 1')" class="w-full flex items-center justify-between px-2.5 py-1 text-xs font-medium rounded-lg text-emerald-200/75 hover:bg-forest-900 hover:text-white transition text-left cursor-pointer">
+            <div class="flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full bg-sky-400"></span>
+              <span class="truncate">Collection 1</span>
+            </div>
+            <span class="text-[10px] font-medium text-emerald-400/80 bg-forest-900 px-1.5 py-0.2 rounded-full">42</span>
+          </button>
+
+          <button id="tabSource_Collection_2" data-source="Collection 2" onclick="setFilterSource('Collection 2')" class="w-full flex items-center justify-between px-2.5 py-1 text-xs font-medium rounded-lg text-emerald-200/75 hover:bg-forest-900 hover:text-white transition text-left cursor-pointer">
+            <div class="flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full bg-purple-400"></span>
+              <span class="truncate">Collection 2</span>
+            </div>
+            <span class="text-[10px] font-medium text-emerald-400/80 bg-forest-900 px-1.5 py-0.2 rounded-full">75</span>
+          </button>
+
+          <button id="tabSource_Collection_3" data-source="Collection 3" onclick="setFilterSource('Collection 3')" class="w-full flex items-center justify-between px-2.5 py-1 text-xs font-medium rounded-lg text-emerald-200/75 hover:bg-forest-900 hover:text-white transition text-left cursor-pointer">
+            <div class="flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full bg-orange-400"></span>
+              <span class="truncate">Collection 3</span>
+            </div>
+            <span class="text-[10px] font-medium text-emerald-400/80 bg-forest-900 px-1.5 py-0.2 rounded-full">14</span>
+          </button>
+
+          <button id="tabSource_Collection_4" data-source="Collection 4" onclick="setFilterSource('Collection 4')" class="w-full flex items-center justify-between px-2.5 py-1 text-xs font-medium rounded-lg text-emerald-200/75 hover:bg-forest-900 hover:text-white transition text-left cursor-pointer">
+            <div class="flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full bg-cyan-400"></span>
+              <span class="truncate">Winter Songs</span>
+            </div>
+            <span class="text-[10px] font-medium text-emerald-400/80 bg-forest-900 px-1.5 py-0.2 rounded-full">8</span>
+          </button>
+
+          <button id="tabSource_Collection_5" data-source="Collection 5" onclick="setFilterSource('Collection 5')" class="w-full flex items-center justify-between px-2.5 py-1 text-xs font-medium rounded-lg text-emerald-200/75 hover:bg-forest-900 hover:text-white transition text-left cursor-pointer">
+            <div class="flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full bg-rose-400"></span>
+              <span class="truncate">Christmas Tree</span>
+            </div>
+            <span class="text-[10px] font-medium text-emerald-400/80 bg-forest-900 px-1.5 py-0.2 rounded-full">14</span>
+          </button>
+
+          <button id="tabSource_Collection_6" data-source="Collection 6" onclick="setFilterSource('Collection 6')" class="w-full flex items-center justify-between px-2.5 py-1 text-xs font-medium rounded-lg text-emerald-200/75 hover:bg-forest-900 hover:text-white transition text-left cursor-pointer">
+            <div class="flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full bg-amber-400"></span>
+              <span class="truncate">Fun Jazzy Songs</span>
+            </div>
+            <span class="text-[10px] font-medium text-emerald-400/80 bg-forest-900 px-1.5 py-0.2 rounded-full">9</span>
+          </button>
+
+          <button id="tabSource_Collection_7" data-source="Collection 7" onclick="setFilterSource('Collection 7')" class="w-full flex items-center justify-between px-2.5 py-1 text-xs font-medium rounded-lg text-emerald-200/75 hover:bg-forest-900 hover:text-white transition text-left cursor-pointer">
+            <div class="flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full bg-indigo-400"></span>
+              <span class="truncate">Postman Adventure</span>
+            </div>
+            <span class="text-[10px] font-medium text-emerald-400/80 bg-forest-900 px-1.5 py-0.2 rounded-full">10</span>
+          </button>
+
+          <button id="tabSource_Collection_8" data-source="Collection 8" onclick="setFilterSource('Collection 8')" class="w-full flex items-center justify-between px-2.5 py-1 text-xs font-medium rounded-lg text-emerald-200/75 hover:bg-forest-900 hover:text-white transition text-left cursor-pointer">
+            <div class="flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+              <span class="truncate">Special Features</span>
+            </div>
+            <span class="text-[10px] font-medium text-emerald-400/80 bg-forest-900 px-1.5 py-0.2 rounded-full">1</span>
+          </button>
+
+        </nav>
+      </div>
+
+      <!-- Categories Filter -->
+      <div class="mb-2" data-purpose="filter-categories">
+        <div class="flex items-center justify-between px-2 mb-1.5">
+          <h3 class="text-[10px] uppercase font-bold text-emerald-500/80 tracking-wider">Categories</h3>
+          <span class="text-[9px] text-emerald-600 font-mono">10 Topics</span>
+        </div>
+        <nav class="space-y-0.5">
+          <button id="tabCatAll" onclick="setFilterCategory('all')" class="w-full flex items-center justify-between px-2.5 py-1 text-xs font-medium rounded-md text-emerald-300 bg-emerald-600/20 border-l-2 border-emerald-400 text-left transition cursor-pointer">
+            <div class="flex items-center gap-2">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 6h16M4 10h16M4 14h16M4 18h16" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+              <span>All Songs</span>
+            </div>
+            <span class="text-[10px] text-emerald-300 font-semibold">173</span>
+          </button>
+
+          <button id="tabCat_Stories & Lessons" onclick="setFilterCategory('Stories & Lessons')" class="w-full flex items-center justify-between px-2.5 py-1 text-xs font-medium rounded-md text-emerald-200/75 hover:bg-forest-900 hover:text-white transition text-left cursor-pointer">
+            <div class="flex items-center gap-2">
+              <span class="text-xs">📖</span>
+              <span class="truncate">Stories & Lessons</span>
+            </div>
+            <span class="text-[10px] text-emerald-400/80 font-medium">27</span>
+          </button>
+
+          <button id="tabCat_Friendship & Character" onclick="setFilterCategory('Friendship & Character')" class="w-full flex items-center justify-between px-2.5 py-1 text-xs font-medium rounded-md text-emerald-200/75 hover:bg-forest-900 hover:text-white transition text-left cursor-pointer">
+            <div class="flex items-center gap-2">
+              <span class="text-xs">🤝</span>
+              <span class="truncate">Friendship & Character</span>
+            </div>
+            <span class="text-[10px] text-emerald-400/80 font-medium">24</span>
+          </button>
+
+          <button id="tabCat_Movement & Dance" onclick="setFilterCategory('Movement & Dance')" class="w-full flex items-center justify-between px-2.5 py-1 text-xs font-medium rounded-md text-emerald-200/75 hover:bg-forest-900 hover:text-white transition text-left cursor-pointer">
+            <div class="flex items-center gap-2">
+              <span class="text-xs">💃</span>
+              <span class="truncate">Movement & Dance</span>
+            </div>
+            <span class="text-[10px] text-emerald-400/80 font-medium">25</span>
+          </button>
+
+          <button id="tabCat_Nature & Everyday Fun" onclick="setFilterCategory('Nature & Everyday Fun')" class="w-full flex items-center justify-between px-2.5 py-1 text-xs font-medium rounded-md text-emerald-200/75 hover:bg-forest-900 hover:text-white transition text-left cursor-pointer">
+            <div class="flex items-center gap-2">
+              <span class="text-xs">🌈</span>
+              <span class="truncate">Nature & Everyday Fun</span>
+            </div>
+            <span class="text-[10px] text-emerald-400/80 font-medium">16</span>
+          </button>
+
+          <button id="tabCat_Folk & Nursery Rhymes" onclick="setFilterCategory('Folk & Nursery Rhymes')" class="w-full flex items-center justify-between px-2.5 py-1 text-xs font-medium rounded-md text-emerald-200/75 hover:bg-forest-900 hover:text-white transition text-left cursor-pointer">
+            <div class="flex items-center gap-2">
+              <span class="text-xs">🪕</span>
+              <span class="truncate">Folk & Nursery Rhymes</span>
+            </div>
+            <span class="text-[10px] text-emerald-400/80 font-medium">16</span>
+          </button>
+
+          <button id="tabCat_Fall & Holidays" onclick="setFilterCategory('Fall & Holidays')" class="w-full flex items-center justify-between px-2.5 py-1 text-xs font-medium rounded-md text-emerald-200/75 hover:bg-forest-900 hover:text-white transition text-left cursor-pointer">
+            <div class="flex items-center gap-2">
+              <span class="text-xs">🎃</span>
+              <span class="truncate">Fall & Holidays</span>
+            </div>
+            <span class="text-[10px] text-emerald-400/80 font-medium">19</span>
+          </button>
+
+          <button id="tabCat_Animals & Nature" onclick="setFilterCategory('Animals & Nature')" class="w-full flex items-center justify-between px-2.5 py-1 text-xs font-medium rounded-md text-emerald-200/75 hover:bg-forest-900 hover:text-white transition text-left cursor-pointer">
+            <div class="flex items-center gap-2">
+              <span class="text-xs">🐾</span>
+              <span class="truncate">Animals & Nature</span>
+            </div>
+            <span class="text-[10px] text-emerald-400/80 font-medium">12</span>
+          </button>
+
+          <button id="tabCat_Welcome & Greetings" onclick="setFilterCategory('Welcome & Greetings')" class="w-full flex items-center justify-between px-2.5 py-1 text-xs font-medium rounded-md text-emerald-200/75 hover:bg-forest-900 hover:text-white transition text-left cursor-pointer">
+            <div class="flex items-center gap-2">
+              <span class="text-xs">👋</span>
+              <span class="truncate">Welcome & Greetings</span>
+            </div>
+            <span class="text-[10px] text-emerald-400/80 font-medium">9</span>
+          </button>
+
+          <button id="tabCat_Beat & Music Basics" onclick="setFilterCategory('Beat & Music Basics')" class="w-full flex items-center justify-between px-2.5 py-1 text-xs font-medium rounded-md text-emerald-200/75 hover:bg-forest-900 hover:text-white transition text-left cursor-pointer">
+            <div class="flex items-center gap-2">
+              <span class="text-xs">🥁</span>
+              <span class="truncate">Beat & Music Basics</span>
+            </div>
+            <span class="text-[10px] text-emerald-400/80 font-medium">20</span>
+          </button>
+
+          <button id="tabCat_Goodbye & Farewell" onclick="setFilterCategory('Goodbye & Farewell')" class="w-full flex items-center justify-between px-2.5 py-1 text-xs font-medium rounded-md text-emerald-200/75 hover:bg-forest-900 hover:text-white transition text-left cursor-pointer">
+            <div class="flex items-center gap-2">
+              <span class="text-xs">👋</span>
+              <span class="truncate">Goodbye & Farewell</span>
+            </div>
+            <span class="text-[10px] text-emerald-400/80 font-medium">5</span>
+          </button>
+
+        </nav>
+      </div>
+    </div>
+  </div>
+
+  <!-- User Profile at Sidebar Bottom -->
+  <div class="p-3 border-t border-emerald-900/80 bg-forest-950" data-purpose="user-status-card">
+    <div class="flex items-center gap-2.5">
+      <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-amber-400 via-emerald-400 to-teal-400 p-[1.5px] flex-shrink-0">
+        <div class="w-full h-full rounded-full bg-forest-950 flex items-center justify-center font-bold text-amber-300 text-xs">
+          JS
+        </div>
+      </div>
+      <div class="flex-1 min-w-0">
+        <p class="text-xs font-semibold text-white truncate leading-tight">Dr. Soker</p>
+        <div class="flex items-center gap-1.5 text-[10px] text-emerald-400 font-medium leading-tight">
+          <span>Song Catalog</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</aside>
+<!-- END: NavigationSidebar -->
+
+<!-- BEGIN: MainContentArea -->
+<main class="flex-1 flex flex-col min-w-0 w-full bg-[#F4F6F9] min-h-screen">
+
+  <!-- BEGIN: Compact HeaderSection (Single Row with Title & Controls) -->
+  <section id="headerSection" class="px-6 lg:px-8 pt-6 pb-4" data-purpose="hub-header">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-3 border-b border-slate-200/90">
+      
+      <!-- Left: Title & Results Count with Mobile Hamburger -->
+      <div class="flex items-center gap-3">
+        <!-- Mobile Drawer Toggle Button -->
+        <button onclick="toggleMobileSidebar()" class="lg:hidden p-2 rounded-xl bg-white border border-slate-200 text-slate-600 hover:text-slate-900 shadow-2xs cursor-pointer" title="Open Categories">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+        </button>
+
+        <div>
+          <h2 id="catalogHeading" class="font-serif text-2xl lg:text-3xl font-bold text-slate-900 tracking-tight leading-tight">
+            Children's Songs &amp; Stories Hub
+          </h2>
+          <div id="resultsCountText" class="text-xs text-slate-500 mt-0.5 font-medium">
+            Showing 173 songs &bull; All Collections
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: Clean Controls (Sort Dropdown & Grid/List View Switcher - List is Default!) -->
+      <div class="flex items-center gap-2.5 flex-shrink-0 self-start sm:self-auto">
+        
+        <!-- Sort Select -->
+        <select id="sortSelect" onchange="handleSort(this.value)" class="text-xs bg-white border border-slate-200 text-slate-700 font-semibold rounded-xl px-3 py-2 shadow-2xs focus:outline-none focus:border-emerald-500 transition cursor-pointer">
+          <option value="default">Default Order</option>
+          <option value="title_asc">Title (A &rarr; Z)</option>
+          <option value="title_desc">Title (Z &rarr; A)</option>
+          <option value="category">By Category</option>
+          <option value="source">By Collection</option>
+        </select>
+
+        <!-- View Switcher (Default: List View Active) -->
+        <div class="flex items-center p-1 bg-white rounded-xl border border-slate-200 shadow-2xs">
+          <button id="btnViewList" onclick="setViewMode('list')" class="p-1.5 rounded-lg text-emerald-700 bg-emerald-50 transition font-semibold cursor-pointer" title="List View">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+          </button>
+          <button id="btnViewGrid" onclick="setViewMode('grid')" class="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 transition cursor-pointer" title="Grid View">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </section>
+  <!-- END: HeaderSection -->
+
+  <!-- BEGIN: Songs Catalog Display Section (12 Items per Page) -->
+  <section id="songsGridSection" class="px-6 lg:px-8 py-2 pb-16 w-full" data-purpose="songs-catalog">
+    
+    <!-- Table List View: DEFAULT ACTIVE VIEW -->
+    <div id="viewListTable" style="display: block;" class="bg-white rounded-2xl border border-slate-200/90 shadow-2xs overflow-hidden w-full">
+      <div class="overflow-x-auto w-full">
+        <table class="w-full text-left border-collapse table-auto">
+          <thead class="bg-slate-50/90 border-b border-slate-200/80 text-[11px] font-bold uppercase tracking-wider text-slate-500 select-none">
+            <tr>
+              <th class="py-3 pl-4 pr-1 w-12 text-center" scope="col">#</th>
+              <th class="py-3 px-3 min-w-[180px]" scope="col">Song / Story Title</th>
+              <th class="py-3 px-3 w-48 whitespace-nowrap" scope="col">Category</th>
+              <th class="py-3 px-2 w-14 text-center" scope="col">Deck</th>
+              <th class="py-3 px-3 min-w-[200px] hidden md:table-cell" scope="col">Description</th>
+              <th class="py-3 pr-5 pl-2 w-24 text-right" scope="col">Action</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody" class="divide-y divide-slate-100 text-sm">
+            <!-- Dynamically populated by JS -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Table Pagination Bar -->
+      <div id="tablePagination" class="px-6 py-3.5 bg-slate-50/60 border-t border-slate-200/80 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <!-- Dynamically rendered -->
+      </div>
+    </div>
+
+    <!-- Card Grid View: INACTIVE BY DEFAULT -->
+    <div id="viewGridCards" style="display: none;">
+      <div id="gridCardsContainer" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-4 xl:gap-5">
+        <!-- Dynamically populated by JS -->
+      </div>
+
+      <!-- Grid Pagination Bar -->
+      <div id="gridPagination" class="mt-6 px-6 py-3.5 bg-white rounded-2xl border border-slate-200/90 shadow-2xs flex flex-col sm:flex-row items-center justify-between gap-4">
+        <!-- Dynamically rendered -->
+      </div>
+    </div>
+
+  </section>
+  <!-- END: Songs Catalog Display Section -->
+
+  <!-- BEGIN: Dedicated Video Preview Page -->
+  <section id="viewVideo" style="display: none;" class="px-6 lg:px-8 py-6 pb-24 w-full">
+    <div class="max-w-5xl mx-auto w-full space-y-5">
+      
+      <!-- Video Top Navigation Bar with Back Button, Prev/Next, Fullscreen & External Link -->
+      <div class="flex flex-wrap items-center justify-between gap-3 bg-white p-3.5 sm:p-4 rounded-2xl border border-slate-200/90 shadow-2xs sticky top-4 z-20">
+        <div class="flex items-center gap-2.5">
+          <!-- Primary Back Button -->
+          <button onclick="goToCatalog()" class="inline-flex items-center gap-2 px-3.5 py-2 text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 active:bg-slate-300 rounded-xl transition shadow-2xs cursor-pointer whitespace-nowrap" title="Return to Songs Catalog (Esc)">
+            <span class="text-sm">&larr;</span>
+            <span>Back to Songs</span>
+          </button>
+          <div class="flex items-center gap-1.5">
+            <span id="videoCategoryTag" class="inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-bold rounded-lg border whitespace-nowrap">Category</span>
+            <span id="videoSourceTag" class="inline-flex items-center gap-1 px-2 py-1 text-[11px] font-bold rounded-lg bg-slate-100 text-slate-600 border border-slate-200 whitespace-nowrap">Deck</span>
+          </div>
+        </div>
+
+        <!-- Right Controls: Prev, Next, Accent Green Fullscreen, External Link -->
+        <div class="flex items-center gap-2">
+          <!-- Prev & Next Video Buttons -->
+          <div class="flex items-center gap-1">
+            <button id="btnPrevVideo" onclick="navigateVideo(-1)" title="Previous Song (← Key)" class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-semibold text-slate-700 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-lg transition cursor-pointer whitespace-nowrap">
+              <span>&larr;</span> Prev
+            </button>
+            <button id="btnNextVideo" onclick="navigateVideo(1)" title="Next Song (→ Key)" class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-semibold text-slate-700 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-lg transition cursor-pointer whitespace-nowrap">
+              Next <span>&rarr;</span>
+            </button>
+          </div>
+
+          <!-- Fullscreen Button: Accent Green Text & Styling for High Discovery -->
+          <button id="navFullscreenBtn" onclick="toggleProtectedFullscreen()" title="Toggle Fullscreen" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-bold text-emerald-800 bg-emerald-100 hover:bg-emerald-200 active:bg-emerald-300 border border-emerald-300 rounded-lg transition shadow-2xs cursor-pointer whitespace-nowrap">
+            <span id="navFsIcon" class="text-emerald-700 text-sm">&#x26F6;</span>
+            <span id="navFsText">Fullscreen</span>
+          </button>
+
+          <!-- External Drive Link -->
+          <a id="topExternalLink" href="" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 rounded-lg transition cursor-pointer whitespace-nowrap" title="Open Video Link in New Tab">
+            <span>Open in Drive</span> ↗
+          </a>
+        </div>
+      </div>
+
+      <!-- 16:9 Video Player Box (Scaled Desktop Viewport: Compact Desktop Controls) -->
+      <div id="videoContainerWrap" class="relative w-full aspect-video bg-black rounded-2xl overflow-hidden shadow-lg border border-slate-300">
+        <iframe id="videoIframe" src="" allow="autoplay; fullscreen; encrypted-media; picture-in-picture" allowfullscreen="true" webkitallowfullscreen="true" mozallowfullscreen="true"></iframe>
+      </div>
+
+      <!-- Video Details & Info Box: Clean Single-Line Header -->
+      <div class="bg-white rounded-2xl border border-slate-200/90 p-6 shadow-2xs">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100">
+          <div class="min-w-0 flex-1">
+            <h2 id="videoHeading" class="font-serif font-bold text-slate-900 text-2xl lg:text-3xl leading-snug truncate">Song Title</h2>
+            <div id="videoMetaPills" class="flex flex-wrap items-center gap-2 mt-2">
+              <span id="metaDeckPill" class="inline-flex items-center px-2.5 py-0.5 text-xs font-semibold rounded-md bg-slate-100 text-slate-700 border border-slate-200 whitespace-nowrap">Collection 1</span>
+              <span id="metaSlidePill" class="inline-flex items-center px-2.5 py-0.5 text-xs font-semibold rounded-md bg-slate-100 text-slate-700 border border-slate-200 whitespace-nowrap">Slide 2</span>
+              <span id="metaStreamPill" class="inline-flex items-center px-2.5 py-0.5 text-xs font-semibold rounded-md bg-emerald-50 text-emerald-800 border border-emerald-200 whitespace-nowrap">Google Drive Stream</span>
+            </div>
+          </div>
+          <div class="flex items-center gap-2 flex-shrink-0">
+            <a id="directDriveBtn" href="" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 rounded-xl shadow-2xs transition whitespace-nowrap cursor-pointer">
+              <span>Watch on Google Drive</span> ↗
+            </a>
+          </div>
+        </div>
+
+        <!-- Description Paragraph -->
+        <div class="pt-4">
+          <h4 class="text-xs uppercase font-bold text-slate-400 tracking-wider mb-1.5">About This Song</h4>
+          <p id="videoDescText" class="text-slate-700 text-sm leading-relaxed"></p>
+        </div>
+      </div>
+
+      <!-- More From Category Section -->
+      <div class="bg-white rounded-2xl border border-slate-200/90 p-6 shadow-2xs">
+        <div class="flex items-center justify-between mb-4">
+          <div>
+            <h3 id="relatedCategoryTitle" class="font-bold text-slate-900 text-base">More Songs in this Category</h3>
+            <p class="text-xs text-slate-500">Quickly jump to other videos from this topic</p>
+          </div>
+          <button onclick="filterToCurrentCategory()" class="text-xs font-semibold text-emerald-700 hover:text-emerald-900 transition cursor-pointer whitespace-nowrap">
+            View All in Catalog &rarr;
+          </button>
+        </div>
+        <div id="relatedSongsGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+          <!-- Dynamically filled -->
+        </div>
+      </div>
+
+    </div>
+  </section>
+  <!-- END: Dedicated Video Preview Page -->
+
+</main>
+<!-- END: MainContentArea -->
+
+<!-- Master JavaScript Logic -->
+<script>
+// Master Song Dataset (173 Unique Songs)
+const allSongs = [{"id": "song_001", "title": "Welcome to Music!", "category": "Welcome & Greetings", "category_icon": "👋", "desc": "Warm, energetic greeting song welcoming students to music class and setting a joyful tone.", "source": "Collection 1", "source_badge": "Col 1", "slide_num": 2, "link": "https://drive.google.com/file/d/1kM5TuV1YGr-tSA1KJMshc1whWsp7cByc/view?usp=sharing", "embed_url": "https://drive.google.com/file/d/1kM5TuV1YGr-tSA1KJMshc1whWsp7cByc/preview", "provider": "Google Drive", "file_id": "1kM5TuV1YGr-tSA1KJMshc1whWsp7cByc"}, {"id": "song_002", "title": "Hello There!", "category": "Welcome & Greetings", "category_icon": "👋", "desc": "Warm, energetic greeting song welcoming students to music class and setting a joyful tone.", "source": "Collection 1", "source_badge": "Col 1", "slide_num": 3, "link": "https://drive.google.com/file/d/1GxeIs0ynbn8ZnfuFBbYi4OzI2anNHcqk/view?usp=sharing", "embed_url": "https://drive.google.com/file/d/1GxeIs0ynbn8ZnfuFBbYi4OzI2anNHcqk/preview", "provider": "Google Drive", "file_id": "1GxeIs0ynbn8ZnfuFBbYi4OzI2anNHcqk"}, {"id": "song_003", "title": "The Magic in My Mind", "category": "Friendship & Character", "category_icon": "🤝", "desc": "Uplifting character-building song encouraging kindness, resilience, family love, and positive habits.", "source": "Collection 1", "source_badge": "Col 1", "slide_num": 4, "link": "https://drive.google.com/file/d/1S32_A7Ov7z8dhSxFHTpBCTv54ebyrmqM/view?usp=sharing", "embed_url": "https://drive.google.com/file/d/1S32_A7Ov7z8dhSxFHTpBCTv54ebyrmqM/preview", "provider": "Google Drive", "file_id": "1S32_A7Ov7z8dhSxFHTpBCTv54ebyrmqM"}, {"id": "song_004", "title": "Do Your Best!", "category": "Friendship & Character", "category_icon": "🤝", "desc": "Uplifting character-building song encouraging kindness, resilience, family love, and positive habits.", "source": "Collection 1", "source_badge": "Col 1", "slide_num": 5, "link": "https://drive.google.com/file/d/1erXB-C1CeshpOLQl4Bntxe9gk-cSHjex/view?usp=sharing", "embed_url": "https://drive.google.com/file/d/1erXB-C1CeshpOLQl4Bntxe9gk-cSHjex/preview", "provider": "Google Drive", "file_id": "1erXB-C1CeshpOLQl4Bntxe9gk-cSHjex"}, {"id": "song_005", "title": "Steady Beat", "category": "Beat & Music Basics", "category_icon": "🥁", "desc": "Foundational music lesson focusing on steady tempo, pitch contrast, counting, and musical meter.", "source": "Collection 1", "source_badge": "Col 1", "slide_num": 6, "link": "https://drive.google.com/file/d/1o4z_e_BLo9f-gYgjJ0YLedfLB7ATjVR3/view?usp=sharing", "embed_url": "https://drive.google.com/file/d/1o4z_e_BLo9f-gYgjJ0YLedfLB7ATjVR3/preview", "provider": "Google Drive", "file_id": "1o4z_e_BLo9f-gYgjJ0YLedfLB7ATjVR3"}, {"id": "song_006", "title": "Beat is All Around", "category": "Beat & Music Basics", "category_icon": "🥁", "desc": "Foundational music lesson focusing on steady tempo, pitch contrast, counting, and musical meter.", "source": "Collection 1", "source_badge": "Col 1", "slide_num": 7, "link": "https://drive.google.com/file/d/1jexAeAW6M7x7gwbAtBAOoU0qaKzZm9-8/view?usp=sharing", "embed_url": "https://drive.google.com/file/d/1jexAeAW6M7x7gwbAtBAOoU0qaKzZm9-8/preview", "provider": "Google Drive", "file_id": "1jexAeAW6M7x7gwbAtBAOoU0qaKzZm9-8"}, {"id": "song_007", "title": "Go and Stop", "category": "Movement & Dance", "category_icon": "💃", "desc": "High-energy movement song encouraging active participation, coordination, and rhythm exercise.", "source": "Collection 1", "source_badge": "Col 1", "slide_num": 8, "link": "https://drive.google.com/file/d/1glgIoAsllIAI8aouCabIYvxjyDKORQJI/view?usp=sharing", "embed_url": "https://drive.google.com/file/d/1glgIoAsllIAI8aouCabIYvxjyDKORQJI/preview", "provider": "Google Drive", "file_id": "1glgIoAsllIAI8aouCabIYvxjyDKORQJI"}, {"id": "song_008", "title": "Can You Clap Your Hands Like Me?", "category": "Movement & Dance", "category_icon": "💃", "desc": "High-energy movement song encouraging active participation, coordination, and rhythm exercise.", "source": "Collection 1", "source_badge": "Col 1", "slide_num": 9, "link": "https://drive.google.com/file/d/1v6GNevRiT4ZfgPTpoDsgxTelyWJWoLj8/view?usp=sharing", "embed_url": "https://drive.google.com/file/d/1v6GNevRiT4ZfgPTpoDsgxTelyWJWoLj8/preview", "provider": "Google Drive", "file_id": "1v6GNevRiT4ZfgPTpoDsgxTelyWJWoLj8"}, {"id": "song_009", "title": "Clap, Clap!", "category": "Movement & Dance", "category_icon": "💃", "desc": "High-energy movement song encouraging active participation, coordination, and rhythm exercise.", "source": "Collection 1", "source_badge": "Col 1", "slide_num": 10, "link": "https://drive.google.com/file/d/1hHD4N2zoo8JwX7zDAeQmK3Qknrnh-9zS/view?usp=sharing", "embed_url": "https://drive.google.com/file/d/1hHD4N2zoo8JwX7zDAeQmK3Qknrnh-9zS/preview", "provider": "Google Drive", "file_id": "1hHD4N2zoo8JwX7zDAeQmK3Qknrnh-9zS"}, {"id": "song_010", "title": "2, 4, 6, 8", "category": "Beat & Music Basics", "category_icon": "🥁", "desc": "Foundational music lesson focusing on steady tempo, pitch contrast, counting, and musical meter.", "source": "Collection 1", "source_badge": "Col 1", "slide_num": 11, "link": "https://drive.google.com/file/d/1kt7bl4t8mydh8PcJOykIYv8JNziN0UwS/view?usp=sharing", "embed_url": "https://drive.google.com/file/d/1kt7bl4t8mydh8PcJOykIYv8JNziN0UwS/preview", "provider": "Google Drive", "file_id": "1kt7bl4t8mydh8PcJOykIYv8JNziN0UwS"}, {"id": "song_011", "title": "1, 2, 3, 4, 5", "category": "Beat & Music Basics", "category_icon": "🥁", "desc": "Foundational music lesson focusing on steady tempo, pitch contrast, counting, and musical meter.", "source": "Collection 1", "source_badge": "Col 1", "slide_num": 12, "link": "https://drive.google.com/file/d/1-Dw-TvVFSLa16X8NiDMw46nqRGci5AuF/view?usp=sharing", "embed_url": "https://drive.google.com/file/d/1-Dw-TvVFSLa16X8NiDMw46nqRGci5AuF/preview", "provider": "Google Drive", "file_id": "1-Dw-TvVFSLa16X8NiDMw46nqRGci5AuF"}, {"id": "song_012", "title": "School Bag (School Supplies)", "category": "Welcome & Greetings", "category_icon": "👋", "desc": "Lively back-to-school song preparing backpacks and getting ready for learning.", "source": "Collection 1", "source_badge": "Col 1", "slide_num": 13, "link": "https://drive.google.com/file/d/1DEpkXYiaw8y9EnKDZ4d8VO72ewntBucz/view?usp=sharing", "embed_url": "https://drive.google.com/file/d/1DEpkXYiaw8y9EnKDZ4d8VO72ewntBucz/preview", "provider": "Google Drive", "file_id": "1DEpkXYiaw8y9EnKDZ4d8VO72ewntBucz"}, {"id": "song_013", "title": "A Dinosaur Just Ate My Lunch", "category": "Animals & Nature", "category_icon": "🐾", "desc": "Comedic, roaring classroom favorite about an unexpected prehistoric lunchtime visitor.", "source": "Collection 1", "source_badge": "Col 1", "slide_num": 14, "link": "https://drive.google.com/file/d/12ZzFmVcQIkpK4aLYXczjbSFw6Mo1FspZ/view?usp=sharing", "embed_url": "https://drive.google.com/file/d/12ZzFmVcQIkpK4aLYXczjbSFw6Mo1FspZ/preview", "provider": "Google Drive", "file_id": "12ZzFmVcQIkpK4aLYXczjbSFw6Mo1FspZ"}, {"id": "song_014", "title": "Stomp, Dinosaur!", "category": "Animals & Nature", "category_icon": "🐾", "desc": "Comedic, roaring classroom favorite about an unexpected prehistoric lunchtime visitor.", "source": "Collection 1", "source_badge": "Col 1", "slide_num": 15, "link": "https://drive.google.com/file/d/1ma1qihYvjUTEL2YJ-e77YBC3C3ydGPFK/view?usp=sharing", "embed_url": "https://drive.google.com/file/d/1ma1qihYvjUTEL2YJ-e77YBC3C3ydGPFK/preview", "provider": "Google Drive", "file_id": "1ma1qihYvjUTEL2YJ-e77YBC3C3ydGPFK"}, {"id": "song_015", "title": "A Ram Sam Sam", "category": "Folk & Nursery Rhymes", "category_icon": "🪕", "desc": "Timeless traditional folk tune and nursery rhyme bringing generations of singing fun.", "source": "Collection 1", "source_badge": "Col 1", "slide_num": 16, "link": "https://drive.google.com/file/d/1qZjLQo-TOyPN_f01PXgyRjma8GlOMcee/view?usp=sharing", "embed_url": "https://drive.google.com/file/d/1qZjLQo-TOyPN_f01PXgyRjma8GlOMcee/preview", "provider": "Google Drive", "file_id": "1qZjLQo-TOyPN_f01PXgyRjma8GlOMcee"}, {"id": "song_016", "title": "Wake Up for School", "category": "Welcome & Greetings", "category_icon": "👋", "desc": "Warm, energetic greeting song welcoming students to music class and setting a joyful tone.", "source": "Collection 1", "source_badge": "Col 1", "slide_num": 17, "link": "https://drive.google.com/file/d/1YSxeh76OTWf2aymlLzf4ch5vebG4IF4G/view?usp=sharing", "embed_url": "https://drive.google.com/file/d/1YSxeh76OTWf2aymlLzf4ch5vebG4IF4G/preview", "provider": "Google Drive", "file_id": "1YSxeh76OTWf2aymlLzf4ch5vebG4IF4G"}, {"id": "song_017", "title": "Walk, Walk, Walk", "category": "Movement & Dance", "category_icon": "💃", "desc": "High-energy movement song encouraging active participation, coordination, and rhythm exercise.", "source": "Collection 1", "source_badge": "Col 1", "slide_num": 18, "link": "https://drive.google.com/file/d/1x_tGJDdFePQGiT6qhbEbUbcn5SJ0V2IA/view?usp=sharing", "embed_url": "https://drive.google.com/file/d/1x_tGJDdFePQGiT6qhbEbUbcn5SJ0V2IA/preview", "provider": "Google Drive", "file_id": "1x_tGJDdFePQGiT6qhbEbUbcn5SJ0V2IA"}, {"id": "song_018", "title": "Shake, Shake, Shake", "category": "Movement & Dance", "category_icon": "💃", "desc": "High-energy movement song encouraging active participation, coordination, and rhythm exercise.", "source": "Collection 1", "source_badge": "Col 1", "slide_num": 19, "link": "https://drive.google.com/file/d/1HJQIWqV0wAfSajBnekosQW1C5Aj1yR6k/view?usp=sharing", "embed_url": "https://drive.google.com/file/d/1HJQIWqV0wAfSajBnekosQW1C5Aj1yR6k/preview", "provider": "Google Drive", "file_id": "1HJQIWqV0wAfSajBnekosQW1C5Aj1yR6k"}, {"id": "song_019", "title": "Snap, Clap, Tap!", "category": "Movement & Dance", "category_icon": "💃", "desc": "High-energy movement song encouraging active participation, coordination, and rhythm exercise.", "source": "Collection 1", "source_badge": "Col 1", "slide_num": 20, "link": "https://drive.google.com/file/d/1Wzr2GEqUuWa3i2rnRovD8JTYX8nBHrud/view?usp=sharing", "embed_url": "https://drive.google.com/file/d/1Wzr2GEqUuWa3i2rnRovD8JTYX8nBHrud/preview", "provider": "Google Drive", "file_id": "1Wzr2GEqUuWa3i2rnRovD8JTYX8nBHrud"}, {"id": "song_020", "title": "The Wheels on the Bus", "category": "Folk & Nursery Rhymes", "category_icon": "🪕", "desc": "All-time favorite sing-along with wipers going swish, horn going beep, and bus bouncing along.", "source": "Collection 1", "source_badge": "Col 1", "slide_num": 21, "link": "https://drive.google.com/file/d/1LH047N6h4DzXiC7xjnMut_2Cn1mkbJx0/view?usp=sharing", "embed_url": "https://drive.google.com/file/d/1LH047N6h4DzXiC7xjnMut_2Cn1mkbJx0/preview", "provider": "Google Drive", "file_id": "1LH047N6h4DzXiC7xjnMut_2Cn1mkbJx0"}, {"id": "song_021", "title": "Kids on the Playground", "category": "Friendship & Character", "category_icon": "🤝", "desc": "Uplifting character-building song encouraging kindness, resilience, family love, and positive habits.", "source": "Collection 1", "source_badge": "Col 1", "slide_num": 22, "link": "https://drive.google.com/file/d/1uijS_0BTBsq-SHpBcVfCdOFlwTwLPYiG/view?usp=sharing", "embed_url": "https://drive.google.com/file/d/1uijS_0BTBsq-SHpBcVfCdOFlwTwLPYiG/preview", "provider": "Google Drive", "file_id": "1uijS_0BTBsq-SHpBcVfCdOFlwTwLPYiG"}, {"id": "song_022", "title": "Ants in Our Pants", "category": "Animals & Nature", "category_icon": "🐾", "desc": "Charming animal song exploring movements, funny creature sounds, and wildlife adventures.", "source": "Collection 1", "source_badge": "Col 1", "slide_num": 23, "link": "https://drive.google.com/file/d/1iRDqec3VXaPaLcbQhikj3yUlHWvnYavg/view?usp=sharing", "embed_url": "https://drive.google.com/file/d/1iRDqec3VXaPaLcbQhikj3yUlHWvnYavg/preview", "provider": "Google Drive", "file_id": "1iRDqec3VXaPaLcbQhikj3yUlHWvnYavg"}, {"id": "song_023", "title": "The Farmer in the Dell", "category": "Folk & Nursery Rhymes", "category_icon": "🪕", "desc": "Timeless traditional folk tune and nursery rhyme bringing generations of singing fun.", "source": "Collection 1", "source_badge": "Col 1", "slide_num": 24, "link": "https://drive.google.com/file/d/1k3oUkJVjU8kpCwId6enTbSSt1-B465OB/view?usp=sharing", "embed_url": "https://drive.google.com/file/d/1k3oUkJVjU8kpCwId6enTbSSt1-B465OB/preview", "provider": "Google Drive", "file_id": "1k3oUkJVjU8kpCwId6enTbSSt1-B465OB"}, {"id": "song_024", "title": "Five Green and Speckled Frogs", "category": "Folk & Nursery Rhymes", "category_icon": "🪕", "desc": "Classic interactive subtraction and counting song about frogs enjoying delicious bugs by the pool.", "source": "Collection 1", "source_badge": "Col 1", "slide_num": 25, "link": "https://drive.google.com/file/d/1Q2wHwG3IvgiPI7pjjyE2r1bSmcAXJv9-/view?usp=sharing", "embed_url": "https://drive.google.com/file/d/1Q2wHwG3IvgiPI7pjjyE2r1bSmcAXJv9-/preview", "provider": "Google Drive", "file_id": "1Q2wHwG3IvgiPI7pjjyE2r1bSmcAXJv9-"}, {"id": "song_025", "title": "If You're Happy and You Know It", "category": "Folk & Nursery Rhymes", "category_icon": "🪕", "desc": "Timeless traditional folk tune and nursery rhyme bringing generations of singing fun.", "source": "Collection 1", "source_badge": "Col 1", "slide_num": 26, "link": "https://drive.google.com/file/d/1CA25xqjisJI-r7JGGS9nFunL6wbotcJO/view?usp=sharing", "embed_url": "https://drive.google.com/file/d/1CA25xqjisJI-r7JGGS9nFunL6wbotcJO/preview", "provider": "Google Drive", "file_id": "1CA25xqjisJI-r7JGGS9nFunL6wbotcJO"}, {"id": "song_026", "title": "March of the Ducks", "category": "Animals & Nature", "category_icon": "🐾", "desc": "Charming animal song exploring movements, funny creature sounds, and wildlife adventures.", "source": "Collection 1", "source_badge": "Col 1", "slide_num": 27, "link": "https://drive.google.com/file/d/1LIrWeqGZceI2QivukmMtPO4fVsyW71JB/view?usp=sharing", "embed_url": "https://drive.google.com/file/d/1LIrWeqGZceI2QivukmMtPO4fVsyW71JB/preview", "provider": "Google Drive", "file_id": "1LIrWeqGZceI2QivukmMtPO4fVsyW71JB"}, {"id": "song_027", "title": "Kangaroo Hop", "category": "Animals & Nature", "category_icon": "🐾", "desc": "Charming animal song exploring movements, funny creature sounds, and wildlife adventures.", "source": "Collection 1", "source_badge": "Col 1", "slide_num": 28, "link": "https://drive.google.com/file/d/1St0E1GtsRzI_MQjtfUGKTBbq2gH-38Xc/view?usp=sharing", "embed_url": "https://drive.google.com/file/d/1St0E1GtsRzI_MQjtfUGKTBbq2gH-38Xc/preview", "provider": "Google Drive", "file_id": "1St0E1GtsRzI_MQjtfUGKTBbq2gH-38Xc"}, {"id": "song_028", "title": "Adventure Away", "category": "Nature & Everyday Fun", "category_icon": "🌈", "desc": "Joyful exploration of everyday wonders, outdoor adventures, and imaginative sing-alongs.", "source": "Collection 1", "source_badge": "Col 1", "slide_num": 29, "link": "https://drive.google.com/file/d/1dSUP1nDHZfQ9JVh04Y2OpeDkdj_1IuHW/view?usp=sharing", "embed_url": "https://drive.google.com/file/d/1dSUP1nDHZfQ9JVh04Y2OpeDkdj_1IuHW/preview", "provider": "Google Drive", "file_id": "1dSUP1nDHZfQ9JVh04Y2OpeDkdj_1IuHW"}, {"id": "song_029", "title": "London Bridge is Falling Down", "category": "Folk & Nursery Rhymes", "category_icon": "🪕", "desc": "Timeless traditional folk tune and nursery rhyme bringing generations of singing fun.", "source": "Collection 1", "source_badge": "Col 1", "slide_num": 30, "link": "https://drive.google.com/file/d/1l7TlVB1CcQhVQ0M7TxHxWcMU3J4Z0OBW/view?usp=sharing", "embed_url": "https://drive.google.com/file/d/1l7TlVB1CcQhVQ0M7TxHxWcMU3J4Z0OBW/preview", "provider": "Google Drive", "file_id": "1l7TlVB1CcQhVQ0M7TxHxWcMU3J4Z0OBW"}, {"id": "song_030", "title": "Waltzing Matilda", "category": "Folk & Nursery Rhymes", "category_icon": "🪕", "desc": "Timeless traditional folk tune and nursery rhyme bringing generations of singing fun.", "source": "Collection 1", "source_badge": "Col 1", "slide_num": 31, "link": "https://drive.google.com/file/d/1Iix901qROEkbXBDC3JliEQYgGbrM0RCr/view?usp=sharing", "embed_url": "https://drive.google.com/file/d/1Iix901qROEkbXBDC3JliEQYgGbrM0RCr/preview", "provider": "Google Drive", "file_id": "1Iix901qROEkbXBDC3JliEQYgGbrM0RCr"}, {"id": "song_031", "title": "I Can Learn", "category": "Friendship & Character", "category_icon": "🤝", "desc": "Uplifting character-building song encouraging kindness, resilience, family love, and positive habits.", "source": "Collection 1", "source_badge": "Col 1", "slide_num": 32, "link": "https://drive.google.com/file/d/1OfJslt0WzH1SLSvthwWx-DmNkFbXLTOI/view?usp=sharing", "embed_url": "https://drive.google.com/file/d/1OfJslt0WzH1SLSvthwWx-DmNkFbXLTOI/preview", "provider": "Google Drive", "file_id": "1OfJslt0WzH1SLSvthwWx-DmNkFbXLTOI"}, {"id": "song_032", "title": "The Muffin Man", "category": "Folk & Nursery Rhymes", "category_icon": "🪕", "desc": "Timeless traditional folk tune and nursery rhyme bringing generations of singing fun.", "source": "Collection 1", "source_badge": "Col 1", "slide_num": 33, "link": "https://drive.google.com/file/d/1Ul8UsVE0fvd2EvcqNKNB3QQA_w2KpOYB/view?usp=sharing", "embed_url": "https://drive.google.com/file/d/1Ul8UsVE0fvd2EvcqNKNB3QQA_w2KpOYB/preview", "provider": "Google Drive", "file_id": "1Ul8UsVE0fvd2EvcqNKNB3QQA_w2KpOYB"}, {"id": "song_033", "title": "The Turtle and the Rabbit Song", "category": "Animals & Nature", "category_icon": "🐾", "desc": "Musical adaptation of Aesop's classic fable exploring fast vs. slow musical tempo.", "source": "Collection 1", "source_badge": "Col 1", "slide_num": 34, "link": "https://drive.google.com/file/d/1AzvHyantHP64i1mQDCZ6VSjObytCHiAG/view?usp=sharing", "embed_url": "https://drive.google.com/file/d/1AzvHyantHP64i1mQDCZ6VSjObytCHiAG/preview", "provider": "Google Drive", "file_id": "1AzvHyantHP64i1mQDCZ6VSjObytCHiAG"}, {"id": "song_034", "title": "My Grandfather", "category": "Friendship & Character", "category_icon": "🤝", "desc": "Touching musical tribute to a beloved grandfather, walking, talking, and cherishing time together.", "source": "Collection 1", "source_badge": "Col 1", "slide_num": 36, "link": "https://drive.google.com/file/d/1dYHX8jwteHY7MocqtyGIUQgLRpszcn-X/view?usp=sharing", "embed_url": "https://drive.google.com/file/d/1dYHX8jwteHY7MocqtyGIUQgLRpszcn-X/preview", "provider": "Google Drive", "file_id": "1dYHX8jwteHY7MocqtyGIUQgLRpszcn-X"}, {"id": "song_035", "title": "Grandfather Song", "category": "Friendship & Character", "category_icon": "🤝", "desc": "Touching musical tribute to a beloved grandfather, walking, talking, and cherishing time together.", "source": "Collection 1", "source_badge": "Col 1", "slide_num": 37, "link": "https://drive.google.com/file/d/16SvPZU-15k_7-6c0BdcAcFiYkHfuBWJ6/view?usp=sharing", "embed_url": "https://drive.google.com/file/d/16SvPZU-15k_7-6c0BdcAcFiYkHfuBWJ6/preview", "provider": "Google Drive", "file_id": "16SvPZU-15k_7-6c0BdcAcFiYkHfuBWJ6"}, {"id": "song_036", "title": "Grandpa's Soup", "category": "Friendship & Character", "category_icon": "🤝", "desc": "Touching musical tribute to a beloved grandfather, walking, talking, and cherishing time together.", "source": "Collection 1", "source_badge": "Col 1", "slide_num": 38, "link": "https://drive.google.com/file/d/1o4B73QESxcptrYLShul7g8a-EMMrF5gC/view?usp=sharing", "embed_url": "https://drive.google.com/file/d/1o4B73QESxcptrYLShul7g8a-EMMrF5gC/preview", "provider": "Google Drive", "file_id": "1o4B73QESxcptrYLShul7g8a-EMMrF5gC"}, {"id": "song_037", "title": "Grandpa Shoes", "category": "Friendship & Character", "category_icon": "🤝", "desc": "Touching musical tribute to a beloved grandfather, walking, talking, and cherishing time together.", "source": "Collection 1", "source_badge": "Col 1", "slide_num": 39, "link": "https://drive.google.com/file/d/1TTExfOzQUwgB6SFSA_VZBsYlTTLVikw_/view?usp=sharing", "embed_url": "https://drive.google.com/file/d/1TTExfOzQUwgB6SFSA_VZBsYlTTLVikw_/preview", "provider": "Google Drive", "file_id": "1TTExfOzQUwgB6SFSA_VZBsYlTTLVikw_"}, {"id": "song_038", "title": "Jumpin' Jacks", "category": "Movement & Dance", "category_icon": "💃", "desc": "High-energy fitness and rhythm workout getting kids jumping to the beat.", "source": "Collection 1", "source_badge": "Col 1", "slide_num": 40, "link": "https://drive.google.com/file/d/1W54lhAmyHI7xLIItdOFQMeGA0xiI7xj9/view?usp=sharing", "embed_url": "https://drive.google.com/file/d/1W54lhAmyHI7xLIItdOFQMeGA0xiI7xj9/preview", "provider": "Google Drive", "file_id": "1W54lhAmyHI7xLIItdOFQMeGA0xiI7xj9"}, {"id": "song_039", "title": "Head, Shoulders, Knees and Toes", "category": "Movement & Dance", "category_icon": "💃", "desc": "High-energy movement song encouraging active participation, coordination, and rhythm exercise.", "source": "Collection 1", "source_badge": "Col 1", "slide_num": 41, "link": "https://drive.google.com/file/d/1AEmgsHadbfzUgr8P2Bou4GZMHwU3meKg/view?usp=sharing", "embed_url": "https://drive.google.com/file/d/1AEmgsHadbfzUgr8P2Bou4GZMHwU3meKg/preview", "provider": "Google Drive", "file_id": "1AEmgsHadbfzUgr8P2Bou4GZMHwU3meKg"}, {"id": "song_040", "title": "It's Time", "category": "Goodbye & Farewell", "category_icon": "👋", "desc": "Closing goodbye song celebrating learning accomplishments and wrapping up music time.", "source": "Collection 1", "source_badge": "Col 1", "slide_num": 42, "link": "https://drive.google.com/file/d/1IoT4BYcrCexAG3MybwOWwXhmP7Ui6Zum/view?usp=sharing", "embed_url": "https://drive.google.com/file/d/1IoT4BYcrCexAG3MybwOWwXhmP7Ui6Zum/preview", "provider": "Google Drive", "file_id": "1IoT4BYcrCexAG3MybwOWwXhmP7Ui6Zum"}, {"id": "song_041", "title": "It's Time to Sing", "category": "Goodbye & Farewell", "category_icon": "👋", "desc": "Closing goodbye song celebrating learning accomplishments and wrapping up music time.", "source": "Collection 1", "source_badge": "Col 1", "slide_num": 43, "link": "https://drive.google.com/file/d/1Zgarfo_OHFfNTDJZy7NsclmOKSAblhs8/view?usp=sharing", "embed_url": "https://drive.google.com/file/d/1Zgarfo_OHFfNTDJZy7NsclmOKSAblhs8/preview", "provider": "Google Drive", "file_id": "1Zgarfo_OHFfNTDJZy7NsclmOKSAblhs8"}, {"id": "song_042", "title": "Motivated!", "category": "Friendship & Character", "category_icon": "🤝", "desc": "Uplifting character-building song encouraging kindness, resilience, family love, and positive habits.", "source": "Collection 1", "source_badge": "Col 1", "slide_num": 44, "link": "https://drive.google.com/file/d/1pgcEwFpNF0E5sbDs8EGOH_qSizis1eS_/view?usp=sharing", "embed_url": "https://drive.google.com/file/d/1pgcEwFpNF0E5sbDs8EGOH_qSizis1eS_/preview", "provider": "Google Drive", "file_id": "1pgcEwFpNF0E5sbDs8EGOH_qSizis1eS_"}, {"id": "song_043", "title": "Hello and Welcome", "category": "Welcome & Greetings", "category_icon": "👋", "desc": "Warm, energetic greeting song welcoming students to music class and setting a joyful tone.", "source": "Collection 2", "source_badge": "Col 2", "slide_num": 2, "link": "https://drive.google.com/file/d/1nthop32EWNZ8R4HdPIgvxu3k81Kc0H-M/view?usp=sharing", "embed_url": "https://drive.google.com/file/d/1nthop32EWNZ8R4HdPIgvxu3k81Kc0H-M/preview", "provider": "Google Drive", "file_id": "1nthop32EWNZ8R4HdPIgvxu3k81Kc0H-M"}, {"id": "song_044", "title": "Bate, Bate, Chocolate", "category": "Folk & Nursery Rhymes", "category_icon": "🪕", "desc": "Vibrant traditional Latin counting and rhyming song celebrating making sweet hot chocolate!", "source": "Collection 2", "source_badge": "Col 2", "slide_num": 4, "link": "https://drive.google.com/file/d/1rC_FSn9iGAKlWbXOdn6_fuv6C9esnJPL/view?usp=sharing", "embed_url": "https://drive.google.com/file/d/1rC_FSn9iGAKlWbXOdn6_fuv6C9esnJPL/preview", "provider": "Google Drive", "file_id": "1rC_FSn9iGAKlWbXOdn6_fuv6C9esnJPL"}, {"id": "song_045", "title": "Jambo Sana", "category": "Welcome & Greetings", "category_icon": "👋", "desc": "Joyful Swahili welcoming song teaching international greetings and friendly musical hospitality.", "source": "Collection 2", "source_badge": "Col 2", "slide_num": 5, "link": "https://drive.google.com/file/d/1bU98AMGcMkIjn3JlYxXNgkED6vQghRgZ/view?usp=sharing", "embed_url": "https://drive.google.com/file/d/1bU98AMGcMkIjn3JlYxXNgkED6vQghRgZ/preview", "provider": "Google Drive", "file_id": "1bU98AMGcMkIjn3JlYxXNgkED6vQghRgZ"}, {"id": "song_046", "title": "Bim Bom", "category": "Beat & Music Basics", "category_icon": "🥁", "desc": "Foundational music lesson focusing on steady tempo, pitch contrast, counting, and musical meter.", "source": "Collection 2", "source_badge": "Col 2", "slide_num": 6, "link": "https://drive.google.com/file/d/1c-ekqB7qXVAJ5ZhrRhakPI89UDKVd3A2/view?usp=sharing", "embed_url": "https://drive.google.com/file/d/1c-ekqB7qXVAJ5ZhrRhakPI89UDKVd3A2/preview", "provider": "Google Drive", "file_id": "1c-ekqB7qXVAJ5ZhrRhakPI89UDKVd3A2"}, {"id": "song_047", "title": "Line Rider Race (Bate Bate Chocolate Rhythm)", "category": "Movement & Dance", "category_icon": "💃", "desc": "Thrilling visual roller-coaster animation mapped to energetic Latin rhythm and tempo changes.", "source": "Collection 2", "source_badge": "Col 2", "slide_num": 7, "link": "https://www.youtube.com/watch?v=rtJ1G3aMaQQ", "embed_url": "https://www.youtube.com/embed/rtJ1G3aMaQQ", "provider": "YouTube", "file_id": "rtJ1G3aMaQQ"}, {"id": "song_048", "title": "Angels Watching Over Me", "category": "Friendship & Character", "category_icon": "🤝", "desc": "Uplifting character-building song encouraging kindness, resilience, family love, and positive habits.", "source": "Collection 2", "source_badge": "Col 2", "slide_num": 9, "link": "https://drive.google.com/file/d/1HkOA197-tnb1kF1YLD43kPF7BXbvb-HO/view?usp=sharing", "embed_url": "https://drive.google.com/file/d/1HkOA197-tnb1kF1YLD43kPF7BXbvb-HO/preview", "provider": "Google Drive", "file_id": "1HkOA197-tnb1kF1YLD43kPF7BXbvb-HO"}, {"id": "song_049", "title": "Let It Float Away", "category": "Friendship & Character", "category_icon": "🤝", "desc": "Gentle mindfulness and social-emotional regulation song helping kids release worries and breathe.", "source": "Collection 2", "source_badge": "Col 2", "slide_num": 10, "link": "https://drive.google.com/file/d/1B8vuDeQNu-onhk1y3uz5fnSeT9b01QaB/view?usp=sharing", "embed_url": "https://drive.google.com/file/d/1B8vuDeQNu-onhk1y3uz5fnSeT9b01QaB/preview", "provider": "Google Drive", "file_id": "1B8vuDeQNu-onhk1y3uz5fnSeT9b01QaB"}, {"id": "song_050", "title": "Colors Everywhere", "category": "Nature & Everyday Fun", "category_icon": "🌈", "desc": "Vibrant bilingual song exploring rainbow hues and everyday colors all around us.", "source": "Collection 2", "source_badge": "Col 2", "slide_num": 11, "link": "https://drive.google.com/file/d/1cuisflVMZ74xC-75lAqLNe9KqX1B1nqT/view?usp=sharing", "embed_url": "https://drive.google.com/file/d/1cuisflVMZ74xC-75lAqLNe9KqX1B1nqT/preview", "provider": "Google Drive", "file_id": "1cuisflVMZ74xC-75lAqLNe9KqX1B1nqT"}, {"id": "song_051", "title": "Step by Step", "category": "Movement & Dance", "category_icon": "💃", "desc": "High-energy movement song encouraging active participation, coordination, and rhythm exercise.", "source": "Collection 2", "source_badge": "Col 2", "slide_num": 12, "link": "https://drive.google.com/file/d/14dLE34VHy3Ddn2_zSjvx2QlvnfaECsE4/view?usp=sharing", "embed_url": "https://drive.google.com/file/d/14dLE34VHy3Ddn2_zSjvx2QlvnfaECsE4/preview", "provider": "Google Drive", "file_id": "14dLE34VHy3Ddn2_zSjvx2QlvnfaECsE4"}, {"id": "song_052", "title": "Les Couleurs (French Colors Song)", "category": "Nature & Everyday Fun", "category_icon": "🌈", "desc": "Vibrant bilingual song exploring rainbow hues and everyday colors all around us.", "source": "Collection 2", "source_badge": "Col 2", "slide_num": 13, "link": "https://drive.google.com/file/d/1CQ4zbCMExIrNIOn5MTsJYLdNlgEwly0M/view?usp=sharing", "embed_url": "https://drive.google.com/file/d/1CQ4zbCMExIrNIOn5MTsJYLdNlgEwly0M/preview", "provider": "Google Drive", "file_id": "1CQ4zbCMExIrNIOn5MTsJYLdNlgEwly0M"}, {"id": "song_053", "title": "The Little Butterfly", "category": "Animals & Nature", "category_icon": "🐾", "desc": "Graceful transformation song following a caterpillar turning into a fluttering butterfly.", "source": "Collection 2", "source_badge": "Col 2", "slide_num": 14, "link": "https://drive.google.com/file/d/1XKgcA-rPKrt7XI21OORAP3YoPO-hJ4kD/view?usp=sharing", "embed_url": "https://drive.google.com/file/d/1XKgcA-rPKrt7XI21OORAP3YoPO-hJ4kD/preview", "provider": "Google Drive", "file_id": "1XKgcA-rPKrt7XI21OORAP3YoPO-hJ4kD"}, {"id": "song_054", "title": "Peanut Butter & Jelly", "category": "Folk & Nursery Rhymes", "category_icon": "🪕", "desc": "Timeless traditional folk tune and nursery rhyme bringing generations of singing fun.", "source": "Collection 2", "source_badge": "Col 2", "slide_num": 17, "link": "https://drive.google.com/file/d/13iz4WC-PDdYd7g9bv2_ZBRlNbzpyldkK/view?usp=sharing", "embed_url": "https://drive.google.com/file/d/13iz4WC-PDdYd7g9bv2_ZBRlNbzpyldkK/preview", "provider": "Google Drive", "file_id": "13iz4WC-PDdYd7g9bv2_ZBRlNbzpyldkK"}, {"id": "song_055", "title": "I Bought Me a Cat", "category": "Animals & Nature", "category_icon": "🐾", "desc": "Charming animal song exploring movements, funny creature sounds, and wildlife adventures.", "source": "Collection 2", "source_badge": "Col 2", "slide_num": 18, "link": "https://drive.google.com/file/d/12kwkNUunyscYsY2yV7BCZS9gXoWzpeXs/view?usp=sharing", "embed_url": "https://drive.google.com/file/d/12kwkNUunyscYsY2yV7BCZS9gXoWzpeXs/preview", "provider": "Google Drive", "file_id": "12kwkNUunyscYsY2yV7BCZS9gXoWzpeXs"}, {"id": "song_056", "title": "Best Friends", "category": "Friendship & Character", "category_icon": "🤝", "desc": "Uplifting character-building song encouraging kindness, resilience, family love, and positive habits.", "source": "Collection 2", "source_badge": "Col 2", "slide_num": 19, "link": "https://drive.google.com/file/d/1aouuCH0CSonRmdHqgn7jOLJaIfK-vDy9/view?usp=sharing", "embed_url": "https://drive.google.com/file/d/1aouuCH0CSonRmdHqgn7jOLJaIfK-vDy9/preview", "provider": "Google Drive", "file_id": "1aouuCH0CSonRmdHqgn7jOLJaIfK-vDy9"}, {"id": "song_057", "title": "Family Song", "category": "Friendship & Character", "category_icon": "🤝", "desc": "Uplifting character-building song encouraging kindness, resilience, family love, and positive habits.", "source": "Collection 2", "source_badge": "Col 2", "slide_num": 20, "link": "https://drive.google.com/file/d/1UQdgm3AxDoPubnLnS7c9Cmbzh-YxVNqq/view?usp=sharing", "embed_url": "https://drive.google.com/file/d/1UQdgm3AxDoPubnLnS7c9Cmbzh-YxVNqq/preview", "provider": "Google Drive", "file_id": "1UQdgm3AxDoPubnLnS7c9Cmbzh-YxVNqq"}, {"id": "song_058", "title": "Watch the River Rushing By", "category": "Nature & Everyday Fun", "category_icon": "🌈", "desc": "Joyful exploration of everyday wonders, outdoor adventures, and imaginative sing-alongs.", "source": "Collection 2", "source_badge": "Col 2", "slide_num": 21, "link": "https://drive.google.com/file/d/12xjsw8OENF929z5h_RBo6J6au1HYtn0q/view?usp=sharing", "embed_url": "https://drive.google.com/file/d/12xjsw8OENF929z5h_RBo6J6au1HYtn0q/preview", "provider": "Google Drive", "file_id": "12xjsw8OENF929z5h_RBo6J6au1HYtn0q"}, {"id": "song_059", "title": "Jenny's Crazy Dream", "category": "Stories & Lessons", "category_icon": "📖", "desc": "Whimsical animated musical tale exploring Jenny's imaginative dreamscapes and rhythms.", "source": "Collection 2", "source_badge": "Col 2", "slide_num": 22, "link": "https://drive.google.com/file/d/1RJWS24kz0P45-ht5d7YhMDcCpqqhVpSa/view?usp=sharing", "embed_url": "https://drive.google.com/file/d/1RJWS24kz0P45-ht5d7YhMDcCpqqhVpSa/preview", "provider": "Google Drive", "file_id": "1RJWS24kz0P45-ht5d7YhMDcCpqqhVpSa"}, {"id": "song_060", "title": "Boobam's First Day at School", "category": "Welcome & Greetings", "category_icon": "👋", "desc": "Reassuring musical story about navigating the excitement and nerves of the first day of school.", "source": "Collection 2", "source_badge": "Col 2", "slide_num": 24, "link": "https://drive.google.com/file/d/13giSAhD-IVijetwkI8yRNJ1g3RoxK7R6/view?usp=sharing", "embed_url": "https://drive.google.com/file/d/13giSAhD-IVijetwkI8yRNJ1g3RoxK7R6/preview", "provider": "Google Drive", "file_id": "13giSAhD-IVijetwkI8yRNJ1g3RoxK7R6"}, {"id": "song_061", "title": "Obeying the Rules", "category": "Welcome & Greetings", "category_icon": "👋", "desc": "Warm, energetic greeting song welcoming students to music class and setting a joyful tone.", "source": "Collection 2", "source_badge": "Col 2", "slide_num": 25, "link": "https://drive.google.com/file/d/1kQOq4TGg-j-62uBCYozdDJ2tqQiSIv7w/view?usp=sharing", "embed_url": "https://drive.google.com/file/d/1kQOq4TGg-j-62uBCYozdDJ2tqQiSIv7w/preview", "provider": "Google Drive", "file_id": "1kQOq4TGg-j-62uBCYozdDJ2tqQiSIv7w"}, {"id": "song_062", "title": "Le Petit Chat (The Little Cat)", "category": "Animals & Nature", "category_icon": "🐾", "desc": "Charming animal song exploring movements, funny creature sounds, and wildlife adventures.", "source": "Collection 2", "source_badge": "Col 2", "slide_num": 26, "link": "https://drive.google.com/file/d/1mBRQSw34_ZyWaXwv-sSe5bjOORdB37Mn/view?usp=sharing", "embed_url": "https://drive.google.com/file/d/1mBRQSw34_ZyWaXwv-sSe5bjOORdB37Mn/preview", "provider": "Google Drive", "file_id": "1mBRQSw34_ZyWaXwv-sSe5bjOORdB37Mn"}, {"id": "song_063", "title": "Le Chat Sur Le Fromage (The Cat on the Cheese)", "category": "Animals & Nature", "category_icon": "🐾", "desc": "Charming animal song exploring movements, funny creature sounds, and wildlife adventures.", "source": "Collection 2", "source_badge": "Col 2", "slide_num": 27, "link": "https://drive.google.com/file/d/10grfkJGcyWOpIxtW3vt6vdIa7bAYRBhY/view?usp=sharing", "embed_url": "https://drive.google.com/file/d/10grfkJGcyWOpIxtW3vt6vdIa7bAYRBhY/preview", "provider": "Google Drive", "file_id": "10grfkJGcyWOpIxtW3vt6vdIa7bAYRBhY"}, {"id": "song_064", "title": "Bounce High, Bounce Low", "category": "Movement & Dance", "category_icon": "💃", "desc": "High-energy movement song encouraging active participation, coordination, and rhythm exercise.", "source": "Collection 2", "source_badge": "Col 2", "slide_num": 28, "link": "https://drive.google.com/file/d/13Q43wSzS4OZrLh0oLiDSD00iys9So2WJ/view?usp=sharing", "embed_url": "https://drive.google.com/file/d/13Q43wSzS4OZrLh0oLiDSD00iys9So2WJ/preview", "provider": "Google Drive", "file_id": "13Q43wSzS4OZrLh0oLiDSD00iys9So2WJ"}, {"id": "song_065", "title": "La La La, Bounce!", "category": "Movement & Dance", "category_icon": "💃", "desc": "High-energy movement song encouraging active participation, coordination, and rhythm exercise.", "source": "Collection 2", "source_badge": "Col 2", "slide_num": 29, "link": "https://drive.google.com/file/d/1Uc-ZSG6y0zmYzWJ_495Di0__IGrmus-d/view?usp=sharing", "embed_url": "https://drive.google.com/file/d/1Uc-ZSG6y0zmYzWJ_495Di0__IGrmus-d/preview", "provider": "Google Drive", "file_id": "1Uc-ZSG6y0zmYzWJ_495Di0__IGrmus-d"}, {"id": "song_066", "title": "I Am a Superhero", "category": "Friendship & Character", "category_icon": "🤝", "desc": "Empowering anthem reminding every child of their unique strengths and heroic potential.", "source": "Collection 2", "source_badge": "Col 2", "slide_num": 30, "link": "https://drive.google.com/file/d/1bW8L-1yYfJOZsEroHL5jpU78EWtD5rr1/view?usp=sharing", "embed_url": "https://drive.google.com/file/d/1bW8L-1yYfJOZsEroHL5jpU78EWtD5rr1/preview", "provider": "Google Drive", "file_id": "1bW8L-1yYfJOZsEroHL5jpU78EWtD5rr1"}, {"id": "song_067", "title": "The Magnifi-Cake (Story)", "category": "Stories & Lessons", "category_icon": "📖", "desc": "Engaging musical story following beloved characters learning valuable life lessons.", "source": "Collection 2", "source_badge": "Col 2", "slide_num": 31, "link": "https://drive.google.com/file/d/1G2_w-UNgppxUft6iiduthxrsc4pAttFn/view?usp=sharing", "embed_url": "https://drive.google.com/file/d/1G2_w-UNgppxUft6iiduthxrsc4pAttFn/preview", "provider": "Google Drive", "file_id": "1G2_w-UNgppxUft6iiduthxrsc4pAttFn"}, {"id": "song_068", "title": "The Baking Song (The Magnificent Cake)", "category": "Nature & Everyday Fun", "category_icon": "🌈", "desc": "Delicious culinary musical adventure mixing batter, baking cakes, and sharing tasty treats.", "source": "Collection 2", "source_badge": "Col 2", "slide_num": 33, "link": "https://drive.google.com/file/d/1_PNlbE78CWqJoAbUD4w2v4vzQnb_ZL3u/view?usp=sharing", "embed_url": "https://drive.google.com/file/d/1_PNlbE78CWqJoAbUD4w2v4vzQnb_ZL3u/preview", "provider": "Google Drive", "file_id": "1_PNlbE78CWqJoAbUD4w2v4vzQnb_ZL3u"}, {"id": "song_069", "title": "Bake a Cake", "category": "Nature & Everyday Fun", "category_icon": "🌈", "desc": "Delicious culinary musical adventure mixing batter, baking cakes, and sharing tasty treats.", "source": "Collection 2", "source_badge": "Col 2", "slide_num": 34, "link": "https://drive.google.com/file/d/1l81Udq-ASHezFkUx0rsKlWD-FoWwS65v/view?usp=sharing", "embed_url": "https://drive.google.com/file/d/1l81Udq-ASHezFkUx0rsKlWD-FoWwS65v/preview", "provider": "Google Drive", "file_id": "1l81Udq-ASHezFkUx0rsKlWD-FoWwS65v"}, {"id": "song_070", "title": "Let's Build a Gingerbread House", "category": "Nature & Everyday Fun", "category_icon": "🌈", "desc": "Joyful exploration of everyday wonders, outdoor adventures, and imaginative sing-alongs.", "source": "Collection 2", "source_badge": "Col 2", "slide_num": 35, "link": "https://drive.google.com/file/d/1skmO7_9NObyrzmbKyKKoGgAIBVvrO2Is/view?usp=sharing", "embed_url": "https://drive.google.com/file/d/1skmO7_9NObyrzmbKyKKoGgAIBVvrO2Is/preview", "provider": "Google Drive", "file_id": "1skmO7_9NObyrzmbKyKKoGgAIBVvrO2Is"}, {"id": "song_071", "title": "Happy to Be in Music Class", "category": "Welcome & Greetings", "category_icon": "👋", "desc": "Warm, energetic greeting song welcoming students to music class and setting a joyful tone.", "source": "Collection 2", "source_badge": "Col 2", "slide_num": 37, "link": "https://drive.google.com/file/d/14xPNt_nef-37bm4mwHuBfkbMRCZ7X5io/view?usp=sharing", "embed_url": "https://drive.google.com/file/d/14xPNt_nef-37bm4mwHuBfkbMRCZ7X5io/preview", "provider": "Google Drive", "file_id": "14xPNt_nef-37bm4mwHuBfkbMRCZ7X5io"}, {"id": "song_072", "title": "Magic Words (Story)", "category": "Stories & Lessons", "category_icon": "📖", "desc": "Engaging musical story following beloved characters learning valuable life lessons.", "source": "Collection 2", "source_badge": "Col 2", "slide_num": 39, "link": "https://drive.google.com/file/d/1G_kePid9E3L_HP_GFF0uspRCRB4RdMkY/view?usp=sharing", "embed_url": "https://drive.google.com/file/d/1G_kePid9E3L_HP_GFF0uspRCRB4RdMkY/preview", "provider": "Google Drive", "file_id": "1G_kePid9E3L_HP_GFF0uspRCRB4RdMkY"}, {"id": "song_073", "title": "Magic Words (Story Questions)", "category": "Stories & Lessons", "category_icon": "📖", "desc": "Interactive comprehension questions module testing classroom listening and story memory.", "source": "Collection 2", "source_badge": "Col 2", "slide_num": 40, "link": "https://drive.google.com/file/d/1g5LcHnnLHWnDDBZisDacd2KQxkTjqw0k/view?usp=sharing", "embed_url": "https://drive.google.com/file/d/1g5LcHnnLHWnDDBZisDacd2KQxkTjqw0k/preview", "provider": "Google Drive", "file_id": "1g5LcHnnLHWnDDBZisDacd2KQxkTjqw0k"}, {"id": "song_074", "title": "High, Low, Wherever You Go", "category": "Beat & Music Basics", "category_icon": "🥁", "desc": "Interactive pitch exploration song helping kids hear and move to high and low pitches.", "source": "Collection 2", "source_badge": "Col 2", "slide_num": 41, "link": "https://drive.google.com/file/d/1iPDHCLr181xsc_tsJ8EuB-21aoMesslQ/view?usp=sharing", "embed_url": "https://drive.google.com/file/d/1iPDHCLr181xsc_tsJ8EuB-21aoMesslQ/preview", "provider": "Google Drive", "file_id": "1iPDHCLr181xsc_tsJ8EuB-21aoMesslQ"}, {"id": "song_075", "title": "Gerald Finds His Way Home (Story)", "category": "Stories & Lessons", "category_icon": "📖", "desc": "Engaging musical story following beloved characters learning valuable life lessons.", "source": "Collection 2", "source_badge": "Col 2", "slide_num": 43, "link": "https://drive.google.com/file/d/1wswg0gtuTXBF71rOwcGBK9E0BqDDiqkW/view?usp=sharing", "embed_url": "https://drive.google.com/file/d/1wswg0gtuTXBF71rOwcGBK9E0BqDDiqkW/preview", "provider": "Google Drive", "file_id": "1wswg0gtuTXBF71rOwcGBK9E0BqDDiqkW"}, {"id": "song_076", "title": "Gerald Finds His Way Home (Story Questions)", "category": "Stories & Lessons", "category_icon": "📖", "desc": "Interactive comprehension questions module testing classroom listening and story memory.", "source": "Collection 2", "source_badge": "Col 2", "slide_num": 44, "link": "https://drive.google.com/file/d/1VDcZoWPPMGKFCA4MlrKF6yBfdYWaPE9j/view?usp=sharing", "embed_url": "https://drive.google.com/file/d/1VDcZoWPPMGKFCA4MlrKF6yBfdYWaPE9j/preview", "provider": "Google Drive", "file_id": "1VDcZoWPPMGKFCA4MlrKF6yBfdYWaPE9j"}, {"id": "song_077", "title": "Snail, Snail, Go Around", "category": "Folk & Nursery Rhymes", "category_icon": "🪕", "desc": "Gentle Solfege folk melody tracing a spiraling snail pattern with steady melodic steps.", "source": "Collection 2", "source_badge": "Col 2", "slide_num": 45, "link": "https://drive.google.com/file/d/1TILriMISkjZaxWvwQDhIZZLjt0FqMjQZ/view?usp=sharing", "embed_url": "https://drive.google.com/file/d/1TILriMISkjZaxWvwQDhIZZLjt0FqMjQZ/preview", "provider": "Google Drive", "file_id": "1TILriMISkjZaxWvwQDhIZZLjt0FqMjQZ"}, {"id": "song_078", "title": "The Waving Song (Wave Goodbye)", "category": "Goodbye & Farewell", "category_icon": "👋", "desc": "Closing goodbye song celebrating learning accomplishments and wrapping up music time.", "source": "Collection 2", "source_badge": "Col 2", "slide_num": 47, "link": "https://drive.google.com/file/d/1hcN3SwVy6rKqNnOaC6n2VcJuI_bshZSn/view?usp=sharing", "embed_url": "https://drive.google.com/file/d/1hcN3SwVy6rKqNnOaC6n2VcJuI_bshZSn/preview", "provider": "Google Drive", "file_id": "1hcN3SwVy6rKqNnOaC6n2VcJuI_bshZSn"}, {"id": "song_079", "title": "Feel the Beat", "category": "Beat & Music Basics", "category_icon": "🥁", "desc": "Foundational music lesson focusing on steady tempo, pitch contrast, counting, and musical meter.", "source": "Collection 2", "source_badge": "Col 2", "slide_num": 49, "link": "https://drive.google.com/file/d/1Toq10pg4hzBq39l66Qk12u95dE80fXNs/view?usp=sharing", "embed_url": "https://drive.google.com/file/d/1Toq10pg4hzBq39l66Qk12u95dE80fXNs/preview", "provider": "Google Drive", "file_id": "1Toq10pg4hzBq39l66Qk12u95dE80fXNs"}, {"id": "song_080", "title": "The Sun, the Star, and the Window (Story)", "category": "Stories & Lessons", "category_icon": "📖", "desc": "Engaging musical story following beloved characters learning valuable life lessons.", "source": "Collection 2", "source_badge": "Col 2", "slide_num": 50, "link": "https://drive.google.com/file/d/17jHRbjLl_Af0WBbtGE22PTwTEsOIy9hx/view?usp=sharing", "embed_url": "https://drive.google.com/file/d/17jHRbjLl_Af0WBbtGE22PTwTEsOIy9hx/preview", "provider": "Google Drive", "file_id": "17jHRbjLl_Af0WBbtGE22PTwTEsOIy9hx"}, {"id": "song_081", "title": "The Sun, the Star, and the Window (Story Questions)", "category": "Stories & Lessons", "category_icon": "📖", "desc": "Interactive comprehension questions module testing classroom listening and story memory.", "source": "Collection 2", "source_badge": "Col 2", "slide_num": 51, "link": "https://drive.google.com/file/d/1yMHx2aDfSWJXvn9BXEJgip8ppAtG0O5B/view?usp=sharing", "embed_url": "https://drive.google.com/file/d/1yMHx2aDfSWJXvn9BXEJgip8ppAtG0O5B/preview", "provider": "Google Drive", "file_id": "1yMHx2aDfSWJXvn9BXEJgip8ppAtG0O5B"}, {"id": "song_082", "title": "The Sun, the Star, and the Window (Song)", "category": "Nature & Everyday Fun", "category_icon": "🌈", "desc": "Lively weather song exploring rain, sunshine, breezes, and how we all grow together.", "source": "Collection 2", "source_badge": "Col 2", "slide_num": 52, "link": "https://drive.google.com/file/d/1rFb1H8UOHJ5MlX5O8FcsnVPGAV1LFt7p/view?usp=sharing", "embed_url": "https://drive.google.com/file/d/1rFb1H8UOHJ5MlX5O8FcsnVPGAV1LFt7p/preview", "provider": "Google Drive", "file_id": "1rFb1H8UOHJ5MlX5O8FcsnVPGAV1LFt7p"}, {"id": "song_083", "title": "The Leaky Bucket", "category": "Nature & Everyday Fun", "category_icon": "🌈", "desc": "Joyful exploration of everyday wonders, outdoor adventures, and imaginative sing-alongs.", "source": "Collection 2", "source_badge": "Col 2", "slide_num": 54, "link": "https://drive.google.com/file/d/1NEqzCgA3z2HRF-RP4owlSeBWqe-UgwrK/view?usp=sharing", "embed_url": "https://drive.google.com/file/d/1NEqzCgA3z2HRF-RP4owlSeBWqe-UgwrK/preview", "provider": "Google Drive", "file_id": "1NEqzCgA3z2HRF-RP4owlSeBWqe-UgwrK"}, {"id": "song_084", "title": "After Class!", "category": "Goodbye & Farewell", "category_icon": "👋", "desc": "Closing goodbye song celebrating learning accomplishments and wrapping up music time.", "source": "Collection 2", "source_badge": "Col 2", "slide_num": 55, "link": "https://drive.google.com/file/d/1myvFDLF75oc7U-nJEwRqyDRAL12vgPNg/view?usp=sharing", "embed_url": "https://drive.google.com/file/d/1myvFDLF75oc7U-nJEwRqyDRAL12vgPNg/preview", "provider": "Google Drive", "file_id": "1myvFDLF75oc7U-nJEwRqyDRAL12vgPNg"}, {"id": "song_085", "title": "Tickle Monsters", "category": "Movement & Dance", "category_icon": "💃", "desc": "Playful giggling movement game teaching self-control, body awareness, and giggles.", "source": "Collection 2", "source_badge": "Col 2", "slide_num": 56, "link": "https://drive.google.com/file/d/1oWs5sS0FKCuVUbO5OEdmwSohDqR-zj1Q/view?usp=sharing", "embed_url": "https://drive.google.com/file/d/1oWs5sS0FKCuVUbO5OEdmwSohDqR-zj1Q/preview", "provider": "Google Drive", "file_id": "1oWs5sS0FKCuVUbO5OEdmwSohDqR-zj1Q"}, {"id": "song_086", "title": "The Tortoise and the Hare: The Rematch (Story)", "category": "Stories & Lessons", "category_icon": "📖", "desc": "Engaging musical story following beloved characters learning valuable life lessons.", "source": "Collection 2", "source_badge": "Col 2", "slide_num": 57, "link": "https://drive.google.com/file/d/1ET6tosTusjcjqRueEL5zJOWp7_eCmZP_/view?usp=sharing", "embed_url": "https://drive.google.com/file/d/1ET6tosTusjcjqRueEL5zJOWp7_eCmZP_/preview", "provider": "Google Drive", "file_id": "1ET6tosTusjcjqRueEL5zJOWp7_eCmZP_"}, {"id": "song_087", "title": "Learning to Listen", "category": "Friendship & Character", "category_icon": "🤝", "desc": "Uplifting character-building song encouraging kindness, resilience, family love, and positive habits.", "source": "Collection 2", "source_badge": "Col 2", "slide_num": 58, "link": "https://drive.google.com/file/d/1dvKXVPhy57uKXnOGmH6uDsHvCZsBgJfE/view?usp=sharing", "embed_url": "https://drive.google.com/file/d/1dvKXVPhy57uKXnOGmH6uDsHvCZsBgJfE/preview", "provider": "Google Drive", "file_id": "1dvKXVPhy57uKXnOGmH6uDsHvCZsBgJfE"}, {"id": "song_088", "title": "Growing Smart", "category": "Friendship & Character", "category_icon": "🤝", "desc": "Uplifting character-building song encouraging kindness, resilience, family love, and positive habits.", "source": "Collection 2", "source_badge": "Col 2", "slide_num": 59, "link": "https://drive.google.com/file/d/1miOAGw4PpOUCjsHORJRZdw81GeSNMmud/view?usp=sharing", "embed_url": "https://drive.google.com/file/d/1miOAGw4PpOUCjsHORJRZdw81GeSNMmud/preview", "provider": "Google Drive", "file_id": "1miOAGw4PpOUCjsHORJRZdw81GeSNMmud"}, {"id": "song_089", "title": "5 Frogs Grow Smart (Story)", "category": "Stories & Lessons", "category_icon": "📖", "desc": "Engaging musical story following beloved characters learning valuable life lessons.", "source": "Collection 2", "source_badge": "Col 2", "slide_num": 60, "link": "https://drive.google.com/file/d/1yaHYv5h7_d28hxhFT1ObSFn-yKxZkIZv/view?usp=sharing", "embed_url": "https://drive.google.com/file/d/1yaHYv5h7_d28hxhFT1ObSFn-yKxZkIZv/preview", "provider": "Google Drive", "file_id": "1yaHYv5h7_d28hxhFT1ObSFn-yKxZkIZv"}, {"id": "song_090", "title": "Arpeggio and the Shape", "category": "Beat & Music Basics", "category_icon": "🥁", "desc": "Fun musical concept video introducing broken chord arpeggios through whimsical shapes.", "source": "Collection 2", "source_badge": "Col 2", "slide_num": 62, "link": "https://drive.google.com/file/d/1hBMmureYoSyrwE8xeCzMCZye7d4PxOh-/view?usp=sharing", "embed_url": "https://drive.google.com/file/d/1hBMmureYoSyrwE8xeCzMCZye7d4PxOh-/preview", "provider": "Google Drive", "file_id": "1hBMmureYoSyrwE8xeCzMCZye7d4PxOh-"}, {"id": "song_091", "title": "Mr. Jackson Meets Mrs. Plumpton (Story)", "category": "Stories & Lessons", "category_icon": "📖", "desc": "Engaging musical story following beloved characters learning valuable life lessons.", "source": "Collection 2", "source_badge": "Col 2", "slide_num": 63, "link": "https://drive.google.com/file/d/1eloxdtrXJxYk9qxwSbZ_fVULZyznOPDD/view?usp=sharing", "embed_url": "https://drive.google.com/file/d/1eloxdtrXJxYk9qxwSbZ_fVULZyznOPDD/preview", "provider": "Google Drive", "file_id": "1eloxdtrXJxYk9qxwSbZ_fVULZyznOPDD"}, {"id": "song_092", "title": "Mr. Jackson Meets Mrs. Plumpton (Story Questions)", "category": "Stories & Lessons", "category_icon": "📖", "desc": "Interactive comprehension questions module testing classroom listening and story memory.", "source": "Collection 2", "source_badge": "Col 2", "slide_num": 64, "link": "https://drive.google.com/file/d/1I-TrrEVgPJYjKOfTZdb3ZDAeykmXG8C6/view?usp=sharing", "embed_url": "https://drive.google.com/file/d/1I-TrrEVgPJYjKOfTZdb3ZDAeykmXG8C6/preview", "provider": "Google Drive", "file_id": "1I-TrrEVgPJYjKOfTZdb3ZDAeykmXG8C6"}, {"id": "song_093", "title": "Make New Friends!", "category": "Friendship & Character", "category_icon": "🤝", "desc": "Uplifting character-building song encouraging kindness, resilience, family love, and positive habits.", "source": "Collection 2", "source_badge": "Col 2", "slide_num": 65, "link": "https://drive.google.com/file/d/1MRQR0NJMFK6kohIc7AJ-ScPVus4XqdhP/view?usp=sharing", "embed_url": "https://drive.google.com/file/d/1MRQR0NJMFK6kohIc7AJ-ScPVus4XqdhP/preview", "provider": "Google Drive", "file_id": "1MRQR0NJMFK6kohIc7AJ-ScPVus4XqdhP"}, {"id": "song_094", "title": "Desk and Chair", "category": "Friendship & Character", "category_icon": "🤝", "desc": "Uplifting character-building song encouraging kindness, resilience, family love, and positive habits.", "source": "Collection 2", "source_badge": "Col 2", "slide_num": 66, "link": "https://drive.google.com/file/d/17EEbfhiNenVuRAAMuGjuNaykMhcRw9LI/view?usp=sharing", "embed_url": "https://drive.google.com/file/d/17EEbfhiNenVuRAAMuGjuNaykMhcRw9LI/preview", "provider": "Google Drive", "file_id": "17EEbfhiNenVuRAAMuGjuNaykMhcRw9LI"}, {"id": "song_095", "title": "Make New Friends (Xylophone Accompaniment)", "category": "Beat & Music Basics", "category_icon": "🥁", "desc": "Instrumental performance video showing mallet technique and pentatonic melody on the xylophone.", "source": "Collection 2", "source_badge": "Col 2", "slide_num": 69, "link": "https://drive.google.com/file/d/1dM7tt1fdvBsyWXQvi3cvdpITL0B3Tuf1/view?usp=sharing", "embed_url": "https://drive.google.com/file/d/1dM7tt1fdvBsyWXQvi3cvdpITL0B3Tuf1/preview", "provider": "Google Drive", "file_id": "1dM7tt1fdvBsyWXQvi3cvdpITL0B3Tuf1"}, {"id": "song_096", "title": "Sharing the Lemonade (Story)", "category": "Stories & Lessons", "category_icon": "📖", "desc": "Engaging musical story following beloved characters learning valuable life lessons.", "source": "Collection 2", "source_badge": "Col 2", "slide_num": 70, "link": "https://drive.google.com/file/d/1ucZQGXW24toHGaSw4vEm-VCoWi7Mq4PA/view?usp=sharing", "embed_url": "https://drive.google.com/file/d/1ucZQGXW24toHGaSw4vEm-VCoWi7Mq4PA/preview", "provider": "Google Drive", "file_id": "1ucZQGXW24toHGaSw4vEm-VCoWi7Mq4PA"}, {"id": "song_097", "title": "Sharing Lemonade (Song)", "category": "Nature & Everyday Fun", "category_icon": "🌈", "desc": "Sunny summertime song celebrating friendship, refreshing drinks, and outdoor picnics.", "source": "Collection 2", "source_badge": "Col 2", "slide_num": 71, "link": "https://drive.google.com/file/d/1Viddbr8R6Mtvh7El-DU_9uVMoaxuJe-w/view?usp=sharing", "embed_url": "https://drive.google.com/file/d/1Viddbr8R6Mtvh7El-DU_9uVMoaxuJe-w/preview", "provider": "Google Drive", "file_id": "1Viddbr8R6Mtvh7El-DU_9uVMoaxuJe-w"}, {"id": "song_098", "title": "Goin' On a Picnic", "category": "Nature & Everyday Fun", "category_icon": "🌈", "desc": "Sunny summertime song celebrating friendship, refreshing drinks, and outdoor picnics.", "source": "Collection 2", "source_badge": "Col 2", "slide_num": 72, "link": "https://drive.google.com/file/d/13W02k7HT-Nsx_klY1GjHlSFhDyLRMH-6/view?usp=sharing", "embed_url": "https://drive.google.com/file/d/13W02k7HT-Nsx_klY1GjHlSFhDyLRMH-6/preview", "provider": "Google Drive", "file_id": "13W02k7HT-Nsx_klY1GjHlSFhDyLRMH-6"}, {"id": "song_099", "title": "My Dog Rags", "category": "Animals & Nature", "category_icon": "🐾", "desc": "Charming animal song exploring movements, funny creature sounds, and wildlife adventures.", "source": "Collection 2", "source_badge": "Col 2", "slide_num": 73, "link": "https://drive.google.com/file/d/1eEbJ1hTpGQmxwxUTWYiB_zDCgfcfQT6x/view?usp=sharing", "embed_url": "https://drive.google.com/file/d/1eEbJ1hTpGQmxwxUTWYiB_zDCgfcfQT6x/preview", "provider": "Google Drive", "file_id": "1eEbJ1hTpGQmxwxUTWYiB_zDCgfcfQT6x"}, {"id": "song_100", "title": "Sara and the Letter (Story)", "category": "Stories & Lessons", "category_icon": "📖", "desc": "Engaging musical story following beloved characters learning valuable life lessons.", "source": "Collection 2", "source_badge": "Col 2", "slide_num": 74, "link": "https://drive.google.com/file/d/1MjljgvTeP4s2TeakMHAt0lMWrAZ2ETD9/view?usp=sharing", "embed_url": "https://drive.google.com/file/d/1MjljgvTeP4s2TeakMHAt0lMWrAZ2ETD9/preview", "provider": "Google Drive", "file_id": "1MjljgvTeP4s2TeakMHAt0lMWrAZ2ETD9"}, {"id": "song_101", "title": "Sara and the Letter (Story Questions)", "category": "Stories & Lessons", "category_icon": "📖", "desc": "Interactive comprehension questions module testing classroom listening and story memory.", "source": "Collection 2", "source_badge": "Col 2", "slide_num": 75, "link": "https://drive.google.com/file/d/1jZEtCoUubh4bRIMGxaX0B8eLv25lJumq/view?usp=sharing", "embed_url": "https://drive.google.com/file/d/1jZEtCoUubh4bRIMGxaX0B8eLv25lJumq/preview", "provider": "Google Drive", "file_id": "1jZEtCoUubh4bRIMGxaX0B8eLv25lJumq"}, {"id": "song_102", "title": "See If I Can Help", "category": "Friendship & Character", "category_icon": "🤝", "desc": "Uplifting character-building song encouraging kindness, resilience, family love, and positive habits.", "source": "Collection 2", "source_badge": "Col 2", "slide_num": 76, "link": "https://drive.google.com/file/d/1to0RfM4pTi0Pe06ZhYhh7O2XrkQLfcw9/view?usp=sharing", "embed_url": "https://drive.google.com/file/d/1to0RfM4pTi0Pe06ZhYhh7O2XrkQLfcw9/preview", "provider": "Google Drive", "file_id": "1to0RfM4pTi0Pe06ZhYhh7O2XrkQLfcw9"}, {"id": "song_103", "title": "Charlie Catches a Big Fish (Story)", "category": "Stories & Lessons", "category_icon": "📖", "desc": "Engaging musical story following beloved characters learning valuable life lessons.", "source": "Collection 2", "source_badge": "Col 2", "slide_num": 78, "link": "https://drive.google.com/file/d/17a_dFdq6PfcvgY9wbUi2ICR1OXbi40L3/view?usp=sharing", "embed_url": "https://drive.google.com/file/d/17a_dFdq6PfcvgY9wbUi2ICR1OXbi40L3/preview", "provider": "Google Drive", "file_id": "17a_dFdq6PfcvgY9wbUi2ICR1OXbi40L3"}, {"id": "song_104", "title": "Charlie Catches a Big Fish (Story Questions)", "category": "Stories & Lessons", "category_icon": "📖", "desc": "Interactive comprehension questions module testing classroom listening and story memory.", "source": "Collection 2", "source_badge": "Col 2", "slide_num": 79, "link": "https://drive.google.com/file/d/1fWVpRmJyaB9R2asteyg0XFxpzT2H5ilk/view?usp=sharing", "embed_url": "https://drive.google.com/file/d/1fWVpRmJyaB9R2asteyg0XFxpzT2H5ilk/preview", "provider": "Google Drive", "file_id": "1fWVpRmJyaB9R2asteyg0XFxpzT2H5ilk"}, {"id": "song_105", "title": "Charlie Over the Ocean", "category": "Folk & Nursery Rhymes", "category_icon": "🪕", "desc": "Timeless traditional folk tune and nursery rhyme bringing generations of singing fun.", "source": "Collection 2", "source_badge": "Col 2", "slide_num": 80, "link": "https://drive.google.com/file/d/1EV_fusKOkdNDNv7FRxDFfxZ3o0lm-SGS/view?usp=sharing", "embed_url": "https://drive.google.com/file/d/1EV_fusKOkdNDNv7FRxDFfxZ3o0lm-SGS/preview", "provider": "Google Drive", "file_id": "1EV_fusKOkdNDNv7FRxDFfxZ3o0lm-SGS"}, {"id": "song_106", "title": "Head and Shoulders, Baby!", "category": "Movement & Dance", "category_icon": "💃", "desc": "High-energy movement song encouraging active participation, coordination, and rhythm exercise.", "source": "Collection 2", "source_badge": "Col 2", "slide_num": 81, "link": "https://drive.google.com/file/d/1N7mEEQj8Axr-MfYKTy59gbWiodnWtGHl/view?usp=sharing", "embed_url": "https://drive.google.com/file/d/1N7mEEQj8Axr-MfYKTy59gbWiodnWtGHl/preview", "provider": "Google Drive", "file_id": "1N7mEEQj8Axr-MfYKTy59gbWiodnWtGHl"}, {"id": "song_107", "title": "The Cowboy Cavalier Comes Home (Story)", "category": "Stories & Lessons", "category_icon": "📖", "desc": "Engaging musical story following beloved characters learning valuable life lessons.", "source": "Collection 2", "source_badge": "Col 2", "slide_num": 82, "link": "https://drive.google.com/file/d/1Pu-ReMh1t9lyLL6JNeZ6VnPv9AAtsV8Y/view?usp=sharing", "embed_url": "https://drive.google.com/file/d/1Pu-ReMh1t9lyLL6JNeZ6VnPv9AAtsV8Y/preview", "provider": "Google Drive", "file_id": "1Pu-ReMh1t9lyLL6JNeZ6VnPv9AAtsV8Y"}, {"id": "song_108", "title": "Cowboy Cavalier (Song)", "category": "Stories & Lessons", "category_icon": "📖", "desc": "Companion adventure ballad recounting the spirited return of the Cowboy Cavalier.", "source": "Collection 2", "source_badge": "Col 2", "slide_num": 84, "link": "https://drive.google.com/file/d/1NpMJ-NImjxHHmR1KGbRT3UZ9LhuFN8-e/view?usp=sharing", "embed_url": "https://drive.google.com/file/d/1NpMJ-NImjxHHmR1KGbRT3UZ9LhuFN8-e/preview", "provider": "Google Drive", "file_id": "1NpMJ-NImjxHHmR1KGbRT3UZ9LhuFN8-e"}, {"id": "song_109", "title": "Vampire Cowboy", "category": "Fall & Holidays", "category_icon": "🎃", "desc": "Spooky and delightful Halloween seasonal song full of playful character acting and motions.", "source": "Collection 2", "source_badge": "Col 2", "slide_num": 85, "link": "https://drive.google.com/file/d/1f0sQobAsTQtNzQtsy5PcH7bt04YRUkrL/view?usp=sharing", "embed_url": "https://drive.google.com/file/d/1f0sQobAsTQtNzQtsy5PcH7bt04YRUkrL/preview", "provider": "Google Drive", "file_id": "1f0sQobAsTQtNzQtsy5PcH7bt04YRUkrL"}, {"id": "song_110", "title": "The Wind, the Cloud, and the Rain (Story)", "category": "Stories & Lessons", "category_icon": "📖", "desc": "Engaging musical story following beloved characters learning valuable life lessons.", "source": "Collection 2", "source_badge": "Col 2", "slide_num": 86, "link": "https://drive.google.com/file/d/1DCPHTlJbsBTNkmaDU1mCgeKakaJssMSZ/view?usp=sharing", "embed_url": "https://drive.google.com/file/d/1DCPHTlJbsBTNkmaDU1mCgeKakaJssMSZ/preview", "provider": "Google Drive", "file_id": "1DCPHTlJbsBTNkmaDU1mCgeKakaJssMSZ"}, {"id": "song_111", "title": "Wind, Rain, Cloud (Song)", "category": "Nature & Everyday Fun", "category_icon": "🌈", "desc": "Lively weather song exploring rain, sunshine, breezes, and how we all grow together.", "source": "Collection 2", "source_badge": "Col 2", "slide_num": 88, "link": "https://drive.google.com/file/d/1KfPQnB_-VlvldLNHZ6MAl_mLxOdwttAP/view?usp=sharing", "embed_url": "https://drive.google.com/file/d/1KfPQnB_-VlvldLNHZ6MAl_mLxOdwttAP/preview", "provider": "Google Drive", "file_id": "1KfPQnB_-VlvldLNHZ6MAl_mLxOdwttAP"}, {"id": "song_112", "title": "Whether the Weather", "category": "Nature & Everyday Fun", "category_icon": "🌈", "desc": "Lively weather song exploring rain, sunshine, breezes, and how we all grow together.", "source": "Collection 2", "source_badge": "Col 2", "slide_num": 89, "link": "https://drive.google.com/file/d/1vnhLjTqBV_fjMciivRnYMQLmBrbsdK5r/view?usp=sharing", "embed_url": "https://drive.google.com/file/d/1vnhLjTqBV_fjMciivRnYMQLmBrbsdK5r/preview", "provider": "Google Drive", "file_id": "1vnhLjTqBV_fjMciivRnYMQLmBrbsdK5r"}, {"id": "song_113", "title": "Boobam and Songbird Get Into Music", "category": "Stories & Lessons", "category_icon": "📖", "desc": "Animated musical adventure following Quaver characters Boobam and Songbird discovering instruments.", "source": "Collection 2", "source_badge": "Col 2", "slide_num": 90, "link": "https://drive.google.com/file/d/1vRG4PXtgmIGVt_c8YLTNchaPFEYIGwbb/view?usp=sharing", "embed_url": "https://drive.google.com/file/d/1vRG4PXtgmIGVt_c8YLTNchaPFEYIGwbb/preview", "provider": "Google Drive", "file_id": "1vRG4PXtgmIGVt_c8YLTNchaPFEYIGwbb"}, {"id": "song_114", "title": "Rainy Weather, Breezy Weather", "category": "Nature & Everyday Fun", "category_icon": "🌈", "desc": "Lively weather song exploring rain, sunshine, breezes, and how we all grow together.", "source": "Collection 2", "source_badge": "Col 2", "slide_num": 91, "link": "https://drive.google.com/file/d/18kB86nkzSkfM9SxCYZoWR8hVJg3kylJK/view?usp=sharing", "embed_url": "https://drive.google.com/file/d/18kB86nkzSkfM9SxCYZoWR8hVJg3kylJK/preview", "provider": "Google Drive", "file_id": "18kB86nkzSkfM9SxCYZoWR8hVJg3kylJK"}, {"id": "song_115", "title": "Goodbye, Farewell", "category": "Goodbye & Farewell", "category_icon": "👋", "desc": "Closing goodbye song celebrating learning accomplishments and wrapping up music time.", "source": "Collection 2", "source_badge": "Col 2", "slide_num": 92, "link": "https://drive.google.com/file/d/1UDWd-PCF862F5El-ziyIPx-5E6M8Lbgx/view?usp=sharing", "embed_url": "https://drive.google.com/file/d/1UDWd-PCF862F5El-ziyIPx-5E6M8Lbgx/preview", "provider": "Google Drive", "file_id": "1UDWd-PCF862F5El-ziyIPx-5E6M8Lbgx"}, {"id": "song_116", "title": "Dolly Faces a Challenge (Story)", "category": "Stories & Lessons", "category_icon": "📖", "desc": "Engaging musical story following beloved characters learning valuable life lessons.", "source": "Collection 2", "source_badge": "Col 2", "slide_num": 93, "link": "https://drive.google.com/file/d/1qAfvn19NWcPSsCPXdonrldWBXpPPByJf/view?usp=sharing", "embed_url": "https://drive.google.com/file/d/1qAfvn19NWcPSsCPXdonrldWBXpPPByJf/preview", "provider": "Google Drive", "file_id": "1qAfvn19NWcPSsCPXdonrldWBXpPPByJf"}, {"id": "song_117", "title": "I Believe in You", "category": "Friendship & Character", "category_icon": "🤝", "desc": "Uplifting character-building song encouraging kindness, resilience, family love, and positive habits.", "source": "Collection 2", "source_badge": "Col 2", "slide_num": 94, "link": "https://drive.google.com/file/d/12Cu8mGiM6jAz9TE5WYuQYaTwClcFi08C/view?usp=sharing", "embed_url": "https://drive.google.com/file/d/12Cu8mGiM6jAz9TE5WYuQYaTwClcFi08C/preview", "provider": "Google Drive", "file_id": "12Cu8mGiM6jAz9TE5WYuQYaTwClcFi08C"}, {"id": "song_118", "title": "Zoom, Zoom, Zap!", "category": "Fall & Holidays", "category_icon": "🎃", "desc": "Seasonal action song celebrating autumn festivities and imaginative play.", "source": "Collection 3", "source_badge": "Col 3", "slide_num": 2, "link": "https://drive.google.com/file/d/1Cl-Se1a6D_T6O8pVEGjr8dl7P_F9MVpP/view?usp=sharing", "embed_url": "https://drive.google.com/file/d/1Cl-Se1a6D_T6O8pVEGjr8dl7P_F9MVpP/preview", "provider": "Google Drive", "file_id": "1Cl-Se1a6D_T6O8pVEGjr8dl7P_F9MVpP"}, {"id": "song_119", "title": "I'm a Little Ghost", "category": "Fall & Holidays", "category_icon": "🎃", "desc": "Spooky and delightful Halloween seasonal song full of playful character acting and motions.", "source": "Collection 3", "source_badge": "Col 3", "slide_num": 3, "link": "https://drive.google.com/file/d/1x2so6FjZamPVa6ZMZ9CJsm31_JlW_9yl/view?usp=sharing", "embed_url": "https://drive.google.com/file/d/1x2so6FjZamPVa6ZMZ9CJsm31_JlW_9yl/preview", "provider": "Google Drive", "file_id": "1x2so6FjZamPVa6ZMZ9CJsm31_JlW_9yl"}, {"id": "song_120", "title": "Hey, Jack! (Jack-O'-Lantern)", "category": "Fall & Holidays", "category_icon": "🎃", "desc": "Seasonal action song celebrating autumn festivities and imaginative play.", "source": "Collection 3", "source_badge": "Col 3", "slide_num": 4, "link": "https://drive.google.com/file/d/1iu9SXQjiRLVhGGCeaCtkw-5Qwq6HAlqL/view?usp=sharing", "embed_url": "https://drive.google.com/file/d/1iu9SXQjiRLVhGGCeaCtkw-5Qwq6HAlqL/preview", "provider": "Google Drive", "file_id": "1iu9SXQjiRLVhGGCeaCtkw-5Qwq6HAlqL"}, {"id": "song_121", "title": "Eenie Meenie Halloweenie", "category": "Fall & Holidays", "category_icon": "🎃", "desc": "Spooky and delightful Halloween seasonal song full of playful character acting and motions.", "source": "Collection 3", "source_badge": "Col 3", "slide_num": 5, "link": "https://drive.google.com/file/d/12bH4hpGrnykbbZiBp0cPNOu7Y73OcvW9/view?usp=sharing", "embed_url": "https://drive.google.com/file/d/12bH4hpGrnykbbZiBp0cPNOu7Y73OcvW9/preview", "provider": "Google Drive", "file_id": "12bH4hpGrnykbbZiBp0cPNOu7Y73OcvW9"}, {"id": "song_122", "title": "The Cat Came Back", "category": "Folk & Nursery Rhymes", "category_icon": "🪕", "desc": "Timeless traditional folk tune and nursery rhyme bringing generations of singing fun.", "source": "Collection 3", "source_badge": "Col 3", "slide_num": 6, "link": "https://drive.google.com/file/d/1IwLDF3ljk2klxY6-UQfv94_IAuQkxtE0/view?usp=sharing", "embed_url": "https://drive.google.com/file/d/1IwLDF3ljk2klxY6-UQfv94_IAuQkxtE0/preview", "provider": "Google Drive", "file_id": "1IwLDF3ljk2klxY6-UQfv94_IAuQkxtE0"}, {"id": "song_123", "title": "Wiggle, Wobble, Pumpkin Pie", "category": "Fall & Holidays", "category_icon": "🎃", "desc": "Spooky and delightful Halloween seasonal song full of playful character acting and motions.", "source": "Collection 3", "source_badge": "Col 3", "slide_num": 8, "link": "https://drive.google.com/file/d/1MgToq6mofNFy7tmgiHeibhEcYRMPBu35/view?usp=sharing", "embed_url": "https://drive.google.com/file/d/1MgToq6mofNFy7tmgiHeibhEcYRMPBu35/preview", "provider": "Google Drive", "file_id": "1MgToq6mofNFy7tmgiHeibhEcYRMPBu35"}, {"id": "song_124", "title": "Two Silly Ghosts", "category": "Fall & Holidays", "category_icon": "🎃", "desc": "Spooky and delightful Halloween seasonal song full of playful character acting and motions.", "source": "Collection 3", "source_badge": "Col 3", "slide_num": 9, "link": "https://drive.google.com/file/d/199scl6Dpd_xKSihtR0rvejTtOHYZCP9Y/view?usp=sharing", "embed_url": "https://drive.google.com/file/d/199scl6Dpd_xKSihtR0rvejTtOHYZCP9Y/preview", "provider": "Google Drive", "file_id": "199scl6Dpd_xKSihtR0rvejTtOHYZCP9Y"}, {"id": "song_125", "title": "Shake Your Shoe!", "category": "Movement & Dance", "category_icon": "💃", "desc": "High-energy movement song encouraging active participation, coordination, and rhythm exercise.", "source": "Collection 3", "source_badge": "Col 3", "slide_num": 10, "link": "https://drive.google.com/file/d/1XLQhr-FmyR2KeiUcKpJmt0Te-ppf50IB/view?usp=sharing", "embed_url": "https://drive.google.com/file/d/1XLQhr-FmyR2KeiUcKpJmt0Te-ppf50IB/preview", "provider": "Google Drive", "file_id": "1XLQhr-FmyR2KeiUcKpJmt0Te-ppf50IB"}, {"id": "song_126", "title": "Ten Big Pumpkins", "category": "Fall & Holidays", "category_icon": "🎃", "desc": "Spooky and delightful Halloween seasonal song full of playful character acting and motions.", "source": "Collection 3", "source_badge": "Col 3", "slide_num": 11, "link": "https://drive.google.com/file/d/1UY_6XOt2C49TiGhmqbtE_42nWOrWupp7/view?usp=sharing", "embed_url": "https://drive.google.com/file/d/1UY_6XOt2C49TiGhmqbtE_42nWOrWupp7/preview", "provider": "Google Drive", "file_id": "1UY_6XOt2C49TiGhmqbtE_42nWOrWupp7"}, {"id": "song_127", "title": "The Turkey Woogie", "category": "Fall & Holidays", "category_icon": "🎃", "desc": "Festive Thanksgiving celebration song with fun rhythmic movement and holiday cheer.", "source": "Collection 3", "source_badge": "Col 3", "slide_num": 12, "link": "https://drive.google.com/file/d/1HNnuii47JTv8GsXTVG90fW4PdaN_421k/view?usp=sharing", "embed_url": "https://drive.google.com/file/d/1HNnuii47JTv8GsXTVG90fW4PdaN_421k/preview", "provider": "Google Drive", "file_id": "1HNnuii47JTv8GsXTVG90fW4PdaN_421k"}, {"id": "song_128", "title": "How I Love Thanksgiving Day", "category": "Fall & Holidays", "category_icon": "🎃", "desc": "Festive Thanksgiving celebration song with fun rhythmic movement and holiday cheer.", "source": "Collection 3", "source_badge": "Col 3", "slide_num": 13, "link": "https://drive.google.com/file/d/1u2KbgTNtgXLlnfe0rgpHj4-M-8x4TjWG/view?usp=sharing", "embed_url": "https://drive.google.com/file/d/1u2KbgTNtgXLlnfe0rgpHj4-M-8x4TjWG/preview", "provider": "Google Drive", "file_id": "1u2KbgTNtgXLlnfe0rgpHj4-M-8x4TjWG"}, {"id": "song_129", "title": "Turkey, Go Away!", "category": "Fall & Holidays", "category_icon": "🎃", "desc": "Festive Thanksgiving celebration song with fun rhythmic movement and holiday cheer.", "source": "Collection 3", "source_badge": "Col 3", "slide_num": 14, "link": "https://drive.google.com/file/d/1iBx3sIRO3O-yHl4uyxIazXnY9pYAAEsi/view?usp=sharing", "embed_url": "https://drive.google.com/file/d/1iBx3sIRO3O-yHl4uyxIazXnY9pYAAEsi/preview", "provider": "Google Drive", "file_id": "1iBx3sIRO3O-yHl4uyxIazXnY9pYAAEsi"}, {"id": "song_130", "title": "A Turkey Named T", "category": "Fall & Holidays", "category_icon": "🎃", "desc": "Festive Thanksgiving celebration song with fun rhythmic movement and holiday cheer.", "source": "Collection 3", "source_badge": "Col 3", "slide_num": 15, "link": "https://drive.google.com/file/d/1HeWbUcrk1PmqS6StxdbkHHGNpRieq7ko/view?usp=sharing", "embed_url": "https://drive.google.com/file/d/1HeWbUcrk1PmqS6StxdbkHHGNpRieq7ko/preview", "provider": "Google Drive", "file_id": "1HeWbUcrk1PmqS6StxdbkHHGNpRieq7ko"}, {"id": "song_131", "title": "Whacky Gobbler", "category": "Fall & Holidays", "category_icon": "🎃", "desc": "Festive Thanksgiving celebration song with fun rhythmic movement and holiday cheer.", "source": "Collection 3", "source_badge": "Col 3", "slide_num": 16, "link": "https://drive.google.com/file/d/1WlR0dxSTQkoUrNn03pGwmMa8uWo4RYht/view?usp=sharing", "embed_url": "https://drive.google.com/file/d/1WlR0dxSTQkoUrNn03pGwmMa8uWo4RYht/preview", "provider": "Google Drive", "file_id": "1WlR0dxSTQkoUrNn03pGwmMa8uWo4RYht"}, {"title": "Christmas Jubilation", "category": "Fall & Holidays", "category_icon": "🎃", "desc": "Joyful holiday celebration song filled with festive energy, bells, and seasonal cheer.", "source": "Collection 4", "source_badge": "Col 4", "source_name": "Winter Songs", "slide_num": 2, "link": "https://drive.google.com/file/d/1M1a3_xi3pFky1mlLOYqqt4xG7gAUpr0G/view", "embed_url": "https://drive.google.com/file/d/1M1a3_xi3pFky1mlLOYqqt4xG7gAUpr0G/preview", "provider": "Google Drive", "file_id": "1M1a3_xi3pFky1mlLOYqqt4xG7gAUpr0G", "id": "song_132"}, {"title": "I Want to Be an Elf!", "category": "Fall & Holidays", "category_icon": "🎃", "desc": "Playful holiday character song exploring the whimsical toy-making magic of Santa's workshop.", "source": "Collection 4", "source_badge": "Col 4", "source_name": "Winter Songs", "slide_num": 3, "link": "https://drive.google.com/file/d/1CcuGTqseAOKhx5yRFxg-cTWJR46KBZZE/view", "embed_url": "https://drive.google.com/file/d/1CcuGTqseAOKhx5yRFxg-cTWJR46KBZZE/preview", "provider": "Google Drive", "file_id": "1CcuGTqseAOKhx5yRFxg-cTWJR46KBZZE", "id": "song_133"}, {"title": "Reindeer, Working for Claus", "category": "Fall & Holidays", "category_icon": "🎃", "desc": "Energetic holiday tune about Santa's loyal reindeer team training and preparing for flight.", "source": "Collection 4", "source_badge": "Col 4", "source_name": "Winter Songs", "slide_num": 4, "link": "https://drive.google.com/file/d/1uoWNRwXk6dH-R3QYywNp-2HDowOtWNqG/view", "embed_url": "https://drive.google.com/file/d/1uoWNRwXk6dH-R3QYywNp-2HDowOtWNqG/preview", "provider": "Google Drive", "file_id": "1uoWNRwXk6dH-R3QYywNp-2HDowOtWNqG", "id": "song_134"}, {"title": "The Snow is Falling", "category": "Nature & Everyday Fun", "category_icon": "🌈", "desc": "Gentle, atmospheric winter song capturing the quiet beauty and wonder of drifting snowflakes.", "source": "Collection 4", "source_badge": "Col 4", "source_name": "Winter Songs", "slide_num": 5, "link": "https://drive.google.com/file/d/1fhy44vDx45i3RBBMQI9d_xZdBSoO_2Dm/view", "embed_url": "https://drive.google.com/file/d/1fhy44vDx45i3RBBMQI9d_xZdBSoO_2Dm/preview", "provider": "Google Drive", "file_id": "1fhy44vDx45i3RBBMQI9d_xZdBSoO_2Dm", "id": "song_135"}, {"title": "Sleigh Ride Fun", "category": "Movement & Dance", "category_icon": "💃", "desc": "Upbeat winter movement song simulating a bumpy, joyful horse-drawn sleigh ride across snow.", "source": "Collection 4", "source_badge": "Col 4", "source_name": "Winter Songs", "slide_num": 6, "link": "https://drive.google.com/file/d/1xZHsHQ8k_K1M8CpFgVkq6kgfYsN6mLpd/view", "embed_url": "https://drive.google.com/file/d/1xZHsHQ8k_K1M8CpFgVkq6kgfYsN6mLpd/preview", "provider": "Google Drive", "file_id": "1xZHsHQ8k_K1M8CpFgVkq6kgfYsN6mLpd", "id": "song_136"}, {"title": "Blitzen's Boogie", "category": "Movement & Dance", "category_icon": "💃", "desc": "Fast-paced rock and boogie dance encouraging kids to groove and twist with Blitzen the reindeer.", "source": "Collection 4", "source_badge": "Col 4", "source_name": "Winter Songs", "slide_num": 7, "link": "https://drive.google.com/file/d/10lOzVqTUTkMibMD6qBMhuM_vG_YYyzd5/view", "embed_url": "https://drive.google.com/file/d/10lOzVqTUTkMibMD6qBMhuM_vG_YYyzd5/preview", "provider": "Google Drive", "file_id": "10lOzVqTUTkMibMD6qBMhuM_vG_YYyzd5", "id": "song_137"}, {"title": "Hat for My Snowman", "category": "Stories & Lessons", "category_icon": "📖", "desc": "Charming winter story song about finding the perfect cozy hat and scarf for a snowman friend.", "source": "Collection 4", "source_badge": "Col 4", "source_name": "Winter Songs", "slide_num": 8, "link": "https://drive.google.com/file/d/1BHUkoO0H9ZAaxiE8-6Ck_qXMwlRnyAJn/view", "embed_url": "https://drive.google.com/file/d/1BHUkoO0H9ZAaxiE8-6Ck_qXMwlRnyAJn/preview", "provider": "Google Drive", "file_id": "1BHUkoO0H9ZAaxiE8-6Ck_qXMwlRnyAJn", "id": "song_138"}, {"title": "Winter Time", "category": "Nature & Everyday Fun", "category_icon": "🌈", "desc": "Cozy classroom anthem celebrating winter activities, building snow forts, and warm hot cocoa.", "source": "Collection 4", "source_badge": "Col 4", "source_name": "Winter Songs", "slide_num": 9, "link": "https://drive.google.com/file/d/1voxdLC8aU_hzQqC0Z7BMCzyP5N8Jps1d/view", "embed_url": "https://drive.google.com/file/d/1voxdLC8aU_hzQqC0Z7BMCzyP5N8Jps1d/preview", "provider": "Google Drive", "file_id": "1voxdLC8aU_hzQqC0Z7BMCzyP5N8Jps1d", "id": "song_139"}, {"title": "Time to Decorate the Tree", "category": "Fall & Holidays", "category_icon": "🎃", "desc": "Festive sing-along about hanging sparkling ornaments, tinsel, and shining lights on the tree.", "source": "Collection 5", "source_badge": "Col 5", "source_name": "Christmas Tree", "slide_num": 7, "link": "https://drive.google.com/file/d/1s7XgRy-G7j9WrTu1Y7as8PtflipJtpSw/view", "embed_url": "https://drive.google.com/file/d/1s7XgRy-G7j9WrTu1Y7as8PtflipJtpSw/preview", "provider": "Google Drive", "file_id": "1s7XgRy-G7j9WrTu1Y7as8PtflipJtpSw", "id": "song_140"}, {"title": "Time to Decorate the Tree (Accompaniment)", "category": "Beat & Music Basics", "category_icon": "🥁", "desc": "Instrumental backing track for classroom performance, vocal practice, and karaoke sing-alongs.", "source": "Collection 5", "source_badge": "Col 5", "source_name": "Christmas Tree", "slide_num": 8, "link": "https://drive.google.com/file/d/1K78qWQ8eaYOTICAX_rPqTCQRR5O5cQl2/view", "embed_url": "https://drive.google.com/file/d/1K78qWQ8eaYOTICAX_rPqTCQRR5O5cQl2/preview", "provider": "Google Drive", "file_id": "1K78qWQ8eaYOTICAX_rPqTCQRR5O5cQl2", "id": "song_141"}, {"title": "I'm Gonna Be Santa's Tree", "category": "Fall & Holidays", "category_icon": "🎃", "desc": "Heartwarming musical story song about a little tree with big dreams of bringing holiday magic.", "source": "Collection 5", "source_badge": "Col 5", "source_name": "Christmas Tree", "slide_num": 13, "link": "https://drive.google.com/file/d/1gs_cl5l9Hs5728j9UWJl1SIV5jz1wSBA/view", "embed_url": "https://drive.google.com/file/d/1gs_cl5l9Hs5728j9UWJl1SIV5jz1wSBA/preview", "provider": "Google Drive", "file_id": "1gs_cl5l9Hs5728j9UWJl1SIV5jz1wSBA", "id": "song_142"}, {"title": "I'm Gonna Be Santa's Tree (Accompaniment)", "category": "Beat & Music Basics", "category_icon": "🥁", "desc": "Instrumental orchestral accompaniment track for student performance and singing rehearsals.", "source": "Collection 5", "source_badge": "Col 5", "source_name": "Christmas Tree", "slide_num": 14, "link": "https://drive.google.com/file/d/1bK8jhcajH0NNhvkPChFgnpDQW6nOrCMZ/view", "embed_url": "https://drive.google.com/file/d/1bK8jhcajH0NNhvkPChFgnpDQW6nOrCMZ/preview", "provider": "Google Drive", "file_id": "1bK8jhcajH0NNhvkPChFgnpDQW6nOrCMZ", "id": "song_143"}, {"title": "Tiny Tree Rap", "category": "Beat & Music Basics", "category_icon": "🥁", "desc": "Rhythmic hip-hop cadence and steady beat practice celebrating the littlest tree's unique charm.", "source": "Collection 5", "source_badge": "Col 5", "source_name": "Christmas Tree", "slide_num": 19, "link": "https://drive.google.com/file/d/1Ql6d24dZm0esjzVlESxhFE5j0Ll2NjbW/view", "embed_url": "https://drive.google.com/file/d/1Ql6d24dZm0esjzVlESxhFE5j0Ll2NjbW/preview", "provider": "Google Drive", "file_id": "1Ql6d24dZm0esjzVlESxhFE5j0Ll2NjbW", "id": "song_144"}, {"title": "Tiny Tree Rap (Accompaniment)", "category": "Beat & Music Basics", "category_icon": "🥁", "desc": "Instrumental rhythm beat track designed for student spoken-word and rhythm class practice.", "source": "Collection 5", "source_badge": "Col 5", "source_name": "Christmas Tree", "slide_num": 20, "link": "https://drive.google.com/file/d/1cuzP2uJUfjpiYGHG4wjdzqE-RU4-C2Af/view", "embed_url": "https://drive.google.com/file/d/1cuzP2uJUfjpiYGHG4wjdzqE-RU4-C2Af/preview", "provider": "Google Drive", "file_id": "1cuzP2uJUfjpiYGHG4wjdzqE-RU4-C2Af", "id": "song_145"}, {"title": "March of the Christmas Tree", "category": "Movement & Dance", "category_icon": "💃", "desc": "Steady marching cadence inviting students to stand, march, and step together in rhythm.", "source": "Collection 5", "source_badge": "Col 5", "source_name": "Christmas Tree", "slide_num": 26, "link": "https://drive.google.com/file/d/1-COrCTU0Y8b4ihqWiOKoXIJo05VdibEH/view", "embed_url": "https://drive.google.com/file/d/1-COrCTU0Y8b4ihqWiOKoXIJo05VdibEH/preview", "provider": "Google Drive", "file_id": "1-COrCTU0Y8b4ihqWiOKoXIJo05VdibEH", "id": "song_146"}, {"title": "March of the Christmas Tree (Accompaniment)", "category": "Beat & Music Basics", "category_icon": "🥁", "desc": "Instrumental brass marching band backing track for classroom walking and tempo drills.", "source": "Collection 5", "source_badge": "Col 5", "source_name": "Christmas Tree", "slide_num": 27, "link": "https://drive.google.com/file/d/12fYvVisl2wGbbAMXVZYGcyXSUJ7PHazq/view", "embed_url": "https://drive.google.com/file/d/12fYvVisl2wGbbAMXVZYGcyXSUJ7PHazq/preview", "provider": "Google Drive", "file_id": "12fYvVisl2wGbbAMXVZYGcyXSUJ7PHazq", "id": "song_147"}, {"title": "Christmas Is...", "category": "Fall & Holidays", "category_icon": "🎃", "desc": "Thoughtful, heartwarming lyric song reflecting on generosity, family warmth, and caring for others.", "source": "Collection 5", "source_badge": "Col 5", "source_name": "Christmas Tree", "slide_num": 32, "link": "https://drive.google.com/file/d/1SP1NlyIGyN8XH7lHbNc-SkRQNPywfTX6/view", "embed_url": "https://drive.google.com/file/d/1SP1NlyIGyN8XH7lHbNc-SkRQNPywfTX6/preview", "provider": "Google Drive", "file_id": "1SP1NlyIGyN8XH7lHbNc-SkRQNPywfTX6", "id": "song_148"}, {"title": "Christmas Is... (Accompaniment)", "category": "Beat & Music Basics", "category_icon": "🥁", "desc": "Gentle acoustic piano and string accompaniment track for choir and ensemble sing-alongs.", "source": "Collection 5", "source_badge": "Col 5", "source_name": "Christmas Tree", "slide_num": 33, "link": "https://drive.google.com/file/d/1yz4bAtx3SQ9m3eNF09jZ1EZugZ3DuwLd/view", "embed_url": "https://drive.google.com/file/d/1yz4bAtx3SQ9m3eNF09jZ1EZugZ3DuwLd/preview", "provider": "Google Drive", "file_id": "1yz4bAtx3SQ9m3eNF09jZ1EZugZ3DuwLd", "id": "song_149"}, {"title": "O Christmas Tree", "category": "Folk & Nursery Rhymes", "category_icon": "🪕", "desc": "Beloved traditional seasonal folk song celebrating evergreen foliage and holiday memories.", "source": "Collection 5", "source_badge": "Col 5", "source_name": "Christmas Tree", "slide_num": 36, "link": "https://drive.google.com/file/d/1MsrXWGtRvYANdjYL6JxdITNSKGnbyTm0/view", "embed_url": "https://drive.google.com/file/d/1MsrXWGtRvYANdjYL6JxdITNSKGnbyTm0/preview", "provider": "Google Drive", "file_id": "1MsrXWGtRvYANdjYL6JxdITNSKGnbyTm0", "id": "song_150"}, {"title": "O Christmas Tree (Accompaniment)", "category": "Beat & Music Basics", "category_icon": "🥁", "desc": "Traditional instrumental melody track with acoustic piano and strings for singing practice.", "source": "Collection 5", "source_badge": "Col 5", "source_name": "Christmas Tree", "slide_num": 37, "link": "https://drive.google.com/file/d/1I7WDyEdgDe8FbwHeUD-K2I0O87Nwe_zk/view", "embed_url": "https://drive.google.com/file/d/1I7WDyEdgDe8FbwHeUD-K2I0O87Nwe_zk/preview", "provider": "Google Drive", "file_id": "1I7WDyEdgDe8FbwHeUD-K2I0O87Nwe_zk", "id": "song_151"}, {"title": "We Wish You a Merry Christmas", "category": "Folk & Nursery Rhymes", "category_icon": "🪕", "desc": "Timeless English festive traditional carol wishing joy, happiness, and peace to families everywhere.", "source": "Collection 5", "source_badge": "Col 5", "source_name": "Christmas Tree", "slide_num": 41, "link": "https://drive.google.com/file/d/1deWFMYvtApeFJgEzXytencqSTbfqKtg9/view", "embed_url": "https://drive.google.com/file/d/1deWFMYvtApeFJgEzXytencqSTbfqKtg9/preview", "provider": "Google Drive", "file_id": "1deWFMYvtApeFJgEzXytencqSTbfqKtg9", "id": "song_152"}, {"title": "We Wish You a Merry Christmas (Accompaniment)", "category": "Beat & Music Basics", "category_icon": "🥁", "desc": "Lively instrumental choir accompaniment backing track for seasonal program finales.", "source": "Collection 5", "source_badge": "Col 5", "source_name": "Christmas Tree", "slide_num": 42, "link": "https://drive.google.com/file/d/1xXp84bQ5Q0bZ49cz0FJz9wexJFl-zL4N/view", "embed_url": "https://drive.google.com/file/d/1xXp84bQ5Q0bZ49cz0FJz9wexJFl-zL4N/preview", "provider": "Google Drive", "file_id": "1xXp84bQ5Q0bZ49cz0FJz9wexJFl-zL4N", "id": "song_153"}, {"title": "Boop Bop Jazz Parade", "category": "Movement & Dance", "category_icon": "💃", "desc": "Lively jazz syncopation and marching parade groove prompting energetic physical expression.", "source": "Collection 6", "source_badge": "Col 6", "source_name": "Fun Jazzy Songs", "slide_num": 2, "link": "https://drive.google.com/file/d/1D6UDmqDGYMrkwxwTMHmt6SO06XBMWX28/view", "embed_url": "https://drive.google.com/file/d/1D6UDmqDGYMrkwxwTMHmt6SO06XBMWX28/preview", "provider": "Google Drive", "file_id": "1D6UDmqDGYMrkwxwTMHmt6SO06XBMWX28", "id": "song_154"}, {"title": "Move Like That!", "category": "Movement & Dance", "category_icon": "💃", "desc": "Dynamic dance game prompting students to mirror quick changes in body postures and rhythm.", "source": "Collection 6", "source_badge": "Col 6", "source_name": "Fun Jazzy Songs", "slide_num": 3, "link": "https://drive.google.com/file/d/1y-hZIOjdb2O5M3fm1BjxuWQqOom0LCYP/view", "embed_url": "https://drive.google.com/file/d/1y-hZIOjdb2O5M3fm1BjxuWQqOom0LCYP/preview", "provider": "Google Drive", "file_id": "1y-hZIOjdb2O5M3fm1BjxuWQqOom0LCYP", "id": "song_155"}, {"title": "And Like That!", "category": "Movement & Dance", "category_icon": "💃", "desc": "Fast-paced follow-the-leader dance progression encouraging creative improvised movements.", "source": "Collection 6", "source_badge": "Col 6", "source_name": "Fun Jazzy Songs", "slide_num": 4, "link": "https://drive.google.com/file/d/1T6nyeD0NASPSXSnbPwuQ20efR2HuImpz/view", "embed_url": "https://drive.google.com/file/d/1T6nyeD0NASPSXSnbPwuQ20efR2HuImpz/preview", "provider": "Google Drive", "file_id": "1T6nyeD0NASPSXSnbPwuQ20efR2HuImpz", "id": "song_156"}, {"title": "Slow Like That!", "category": "Beat & Music Basics", "category_icon": "🥁", "desc": "Exploration of tempo contrasts, decelerating physical movement to follow steady largo beats.", "source": "Collection 6", "source_badge": "Col 6", "source_name": "Fun Jazzy Songs", "slide_num": 5, "link": "https://drive.google.com/file/d/1W57bqpS7Z2Sraq8a2aSbvM63L_eiHHVG/view", "embed_url": "https://drive.google.com/file/d/1W57bqpS7Z2Sraq8a2aSbvM63L_eiHHVG/preview", "provider": "Google Drive", "file_id": "1W57bqpS7Z2Sraq8a2aSbvM63L_eiHHVG", "id": "song_157"}, {"title": "Underwater!", "category": "Stories & Lessons", "category_icon": "📖", "desc": "Imaginative musical deep-sea dive with floating, swimming motions and bubbling sounds.", "source": "Collection 6", "source_badge": "Col 6", "source_name": "Fun Jazzy Songs", "slide_num": 6, "link": "https://drive.google.com/file/d/1Z3U7m7N0f7TWpy5u0Upk73F6y_Y-UGEn/view", "embed_url": "https://drive.google.com/file/d/1Z3U7m7N0f7TWpy5u0Upk73F6y_Y-UGEn/preview", "provider": "Google Drive", "file_id": "1Z3U7m7N0f7TWpy5u0Upk73F6y_Y-UGEn", "id": "song_158"}, {"title": "Scary Like That!", "category": "Stories & Lessons", "category_icon": "📖", "desc": "Playful spooky jazz rhythm with suspenseful tiptoeing steps and dramatic dynamic surprises.", "source": "Collection 6", "source_badge": "Col 6", "source_name": "Fun Jazzy Songs", "slide_num": 7, "link": "https://drive.google.com/file/d/1R-5VwVTv-JqreYIwDiC0hy47qR5o2iux/view", "embed_url": "https://drive.google.com/file/d/1R-5VwVTv-JqreYIwDiC0hy47qR5o2iux/preview", "provider": "Google Drive", "file_id": "1R-5VwVTv-JqreYIwDiC0hy47qR5o2iux", "id": "song_159"}, {"title": "Sway Like That!", "category": "Movement & Dance", "category_icon": "💃", "desc": "Smooth lateral swaying motion teaching graceful musical phrasing, balance, and flow.", "source": "Collection 6", "source_badge": "Col 6", "source_name": "Fun Jazzy Songs", "slide_num": 8, "link": "https://drive.google.com/file/d/1CWg7wbUG9qKw4PWpmlAOvCn1k-uvGoMJ/view", "embed_url": "https://drive.google.com/file/d/1CWg7wbUG9qKw4PWpmlAOvCn1k-uvGoMJ/preview", "provider": "Google Drive", "file_id": "1CWg7wbUG9qKw4PWpmlAOvCn1k-uvGoMJ", "id": "song_160"}, {"title": "Dance Like That!", "category": "Movement & Dance", "category_icon": "💃", "desc": "High-octane freestyle jazz dance song prompting kids to spin, leap, and groove freely.", "source": "Collection 6", "source_badge": "Col 6", "source_name": "Fun Jazzy Songs", "slide_num": 9, "link": "https://drive.google.com/file/d/1EISUcwI-F7BJLTB_G31zXebUPjmcK-nA/view", "embed_url": "https://drive.google.com/file/d/1EISUcwI-F7BJLTB_G31zXebUPjmcK-nA/preview", "provider": "Google Drive", "file_id": "1EISUcwI-F7BJLTB_G31zXebUPjmcK-nA", "id": "song_161"}, {"title": "Animal Moves Song", "category": "Animals & Nature", "category_icon": "🐾", "desc": "Energetic animal impersonation dance hopping like rabbits, prowling like lions, and stomping.", "source": "Collection 6", "source_badge": "Col 6", "source_name": "Fun Jazzy Songs", "slide_num": 10, "link": "https://drive.google.com/file/d/1HOBIrAW-A26ejgPMiMVsDy6sfhRZy5tm/view", "embed_url": "https://drive.google.com/file/d/1HOBIrAW-A26ejgPMiMVsDy6sfhRZy5tm/preview", "provider": "Google Drive", "file_id": "1HOBIrAW-A26ejgPMiMVsDy6sfhRZy5tm", "id": "song_162"}, {"title": "Please Mr. Postman", "category": "Stories & Lessons", "category_icon": "📖", "desc": "Classic Motown musical number opening Sammy the Postman's neighborhood mail delivery route.", "source": "Collection 7", "source_badge": "Col 7", "source_name": "The Postman's Adventure", "slide_num": 3, "link": "https://drive.google.com/file/d/1IR8kwk7C6bZvjQb98Pk75tDEkzwf2T4o/view", "embed_url": "https://drive.google.com/file/d/1IR8kwk7C6bZvjQb98Pk75tDEkzwf2T4o/preview", "provider": "Google Drive", "file_id": "1IR8kwk7C6bZvjQb98Pk75tDEkzwf2T4o", "id": "song_163"}, {"title": "I'm a Believer (Vocal)", "category": "Friendship & Character", "category_icon": "🤝", "desc": "Uplifting vocal sing-along inspiring optimism and encouragement on the search for the lost letter.", "source": "Collection 7", "source_badge": "Col 7", "source_name": "The Postman's Adventure", "slide_num": 5, "link": "https://drive.google.com/file/d/1iqdcopSZ7NeEMRNQpKzsAdio8l8HZeJd/view", "embed_url": "https://drive.google.com/file/d/1iqdcopSZ7NeEMRNQpKzsAdio8l8HZeJd/preview", "provider": "Google Drive", "file_id": "1iqdcopSZ7NeEMRNQpKzsAdio8l8HZeJd", "id": "song_164"}, {"title": "It's a Small World (Vocal)", "category": "Folk & Nursery Rhymes", "category_icon": "🪕", "desc": "Classic world friendship anthem celebrating unity, diversity, and cooperative teamwork.", "source": "Collection 7", "source_badge": "Col 7", "source_name": "The Postman's Adventure", "slide_num": 7, "link": "https://drive.google.com/file/d/1oqlnKVLLNNA58CfVDUE1cTHpHpvtRdxg/view", "embed_url": "https://drive.google.com/file/d/1oqlnKVLLNNA58CfVDUE1cTHpHpvtRdxg/preview", "provider": "Google Drive", "file_id": "1oqlnKVLLNNA58CfVDUE1cTHpHpvtRdxg", "id": "song_165"}, {"title": "It's a Small World (Accompaniment)", "category": "Beat & Music Basics", "category_icon": "🥁", "desc": "Instrumental backing track with whimsical carousel chimes for classroom vocal accompaniment.", "source": "Collection 7", "source_badge": "Col 7", "source_name": "The Postman's Adventure", "slide_num": 8, "link": "https://drive.google.com/file/d/1pk1jhDumC-9PPWb1g0ANlHk2izMXL16S/view", "embed_url": "https://drive.google.com/file/d/1pk1jhDumC-9PPWb1g0ANlHk2izMXL16S/preview", "provider": "Google Drive", "file_id": "1pk1jhDumC-9PPWb1g0ANlHk2izMXL16S", "id": "song_166"}, {"title": "The Addams Family", "category": "Stories & Lessons", "category_icon": "📖", "desc": "Finger-snapping rhythm and comedic spooky melody exploring the mysterious old mansion.", "source": "Collection 7", "source_badge": "Col 7", "source_name": "The Postman's Adventure", "slide_num": 10, "link": "https://drive.google.com/file/d/1vZY7FUWchc0smRUDTVkQC-RZfUwQ42v9/view", "embed_url": "https://drive.google.com/file/d/1vZY7FUWchc0smRUDTVkQC-RZfUwQ42v9/preview", "provider": "Google Drive", "file_id": "1vZY7FUWchc0smRUDTVkQC-RZfUwQ42v9", "id": "song_167"}, {"title": "Hakuna Matata", "category": "Friendship & Character", "category_icon": "🤝", "desc": "Joyful African savannah groove about staying calm, letting go of worries, and helping friends.", "source": "Collection 7", "source_badge": "Col 7", "source_name": "The Postman's Adventure", "slide_num": 13, "link": "https://drive.google.com/file/d/1DxuxE06z1KZDCPTp77dH1OD9jFdETc4X/view", "embed_url": "https://drive.google.com/file/d/1DxuxE06z1KZDCPTp77dH1OD9jFdETc4X/preview", "provider": "Google Drive", "file_id": "1DxuxE06z1KZDCPTp77dH1OD9jFdETc4X", "id": "song_168"}, {"title": "Candle on the Water", "category": "Friendship & Character", "category_icon": "🤝", "desc": "Lyrical beacon song about kindness, perseverance, and guiding friends safely through challenges.", "source": "Collection 7", "source_badge": "Col 7", "source_name": "The Postman's Adventure", "slide_num": 15, "link": "https://drive.google.com/file/d/1VEi3-_7oQpPuyj2iE8YkNHIbgdOtDVMs/view", "embed_url": "https://drive.google.com/file/d/1VEi3-_7oQpPuyj2iE8YkNHIbgdOtDVMs/preview", "provider": "Google Drive", "file_id": "1VEi3-_7oQpPuyj2iE8YkNHIbgdOtDVMs", "id": "song_169"}, {"title": "Argentina (Vocal Sing-Along)", "category": "Movement & Dance", "category_icon": "💃", "desc": "Celebratory Latin vocal sing-along cheering the safe discovery and return of the lost letter.", "source": "Collection 7", "source_badge": "Col 7", "source_name": "The Postman's Adventure", "slide_num": 17, "link": "https://drive.google.com/file/d/1jUKmor3CG7k0kn5IyJPnD9HkLub4KRNk/view", "embed_url": "https://drive.google.com/file/d/1jUKmor3CG7k0kn5IyJPnD9HkLub4KRNk/preview", "provider": "Google Drive", "file_id": "1jUKmor3CG7k0kn5IyJPnD9HkLub4KRNk", "id": "song_170"}, {"title": "Argentina (Instrumental)", "category": "Beat & Music Basics", "category_icon": "🥁", "desc": "Acoustic instrumental Latin arrangement highlighting syncopated guitar rhythms and percussion.", "source": "Collection 7", "source_badge": "Col 7", "source_name": "The Postman's Adventure", "slide_num": 18, "link": "https://drive.google.com/file/d/1wmRxx5hF1vlZw5N-2gWpDFSvSSTYlTDo/view", "embed_url": "https://drive.google.com/file/d/1wmRxx5hF1vlZw5N-2gWpDFSvSSTYlTDo/preview", "provider": "Google Drive", "file_id": "1wmRxx5hF1vlZw5N-2gWpDFSvSSTYlTDo", "id": "song_171"}, {"title": "Argentina (Movement & Dance)", "category": "Movement & Dance", "category_icon": "💃", "desc": "High-spirited grand finale ensemble choreography celebrating teamwork and community joy.", "source": "Collection 7", "source_badge": "Col 7", "source_name": "The Postman's Adventure", "slide_num": 19, "link": "https://drive.google.com/file/d/1ovSpDc9L7piK5NeKsjg82tP6hB_6cP7r/view", "embed_url": "https://drive.google.com/file/d/1ovSpDc9L7piK5NeKsjg82tP6hB_6cP7r/preview", "provider": "Google Drive", "file_id": "1ovSpDc9L7piK5NeKsjg82tP6hB_6cP7r", "id": "song_172"}, {"title": "The Forest of Kindness", "category": "Friendship & Character", "category_icon": "🤝", "desc": "Heartwarming musical story about kindness, empathy, helping friends in need, and making a difference.", "source": "Collection 8", "source_badge": "Col 8", "source_name": "Special Features", "slide_num": 1, "link": "https://drive.google.com/file/d/1HtbrJZ0rntqSyE4bpvM4lX91e37_A-Bm/view", "embed_url": "https://drive.google.com/file/d/1HtbrJZ0rntqSyE4bpvM4lX91e37_A-Bm/preview", "provider": "Google Drive", "file_id": "1HtbrJZ0rntqSyE4bpvM4lX91e37_A-Bm", "id": "song_173"}];
+
+// State Variables
+let currentSourceFilter = "all";
+let currentCategoryFilter = "all";
+let currentSearchQuery = "";
+let currentSortMode = "default";
+let currentViewMode = localStorage.getItem("songHub_viewMode") || "list";
+let currentPage = 1;
+const PAGE_SIZE = 12; // 12 items per page: Fits cleanly on 1 screen without long scroll!
+
+let activeVideo = null;
+let filteredSongs = [...allSongs];
+
+// Safe HTML Escaping Utility for XSS Prevention
+function escapeHtml(str) {
+  if (!str) return "";
+  return String(str)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+// Category Badge Color Palette
+const categoryColors = {
+  "Stories & Lessons": { bg: "bg-amber-50", text: "text-amber-700", border: "border-amber-200" },
+  "Friendship & Character": { bg: "bg-emerald-50", text: "text-emerald-700", border: "border-emerald-200" },
+  "Movement & Dance": { bg: "bg-purple-50", text: "text-purple-700", border: "border-purple-200" },
+  "Nature & Everyday Fun": { bg: "bg-teal-50", text: "text-teal-700", border: "border-teal-200" },
+  "Folk & Nursery Rhymes": { bg: "bg-sky-50", text: "text-sky-700", border: "border-sky-200" },
+  "Fall & Holidays": { bg: "bg-orange-50", text: "text-orange-700", border: "border-orange-200" },
+  "Animals & Nature": { bg: "bg-green-50", text: "text-green-700", border: "border-green-200" },
+  "Welcome & Greetings": { bg: "bg-blue-50", text: "text-blue-700", border: "border-blue-200" },
+  "Beat & Music Basics": { bg: "bg-cyan-50", text: "text-cyan-700", border: "border-cyan-200" },
+  "Goodbye & Farewell": { bg: "bg-rose-50", text: "text-rose-700", border: "border-rose-200" }
+};
+
+function getCategoryBadge(catName, icon) {
+  const conf = categoryColors[catName] || { bg: "bg-slate-50", text: "text-slate-700", border: "border-slate-200" };
+  return `<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 text-xs font-bold rounded-lg ${conf.bg} ${conf.text} border ${conf.border} whitespace-nowrap"><span>${icon || "🎵"}</span><span>${escapeHtml(catName)}</span></span>`;
+}
+
+// Deck Badge Config Map (Collections 1 through 8)
+const deckBadgeMap = {
+  "Collection 1": { label: "1", bg: "bg-sky-100", text: "text-sky-700", border: "border-sky-300", title: "Collection 1" },
+  "Collection 2": { label: "2", bg: "bg-purple-100", text: "text-purple-700", border: "border-purple-300", title: "Collection 2" },
+  "Collection 3": { label: "3", bg: "bg-orange-100", text: "text-orange-700", border: "border-orange-300", title: "Collection 3" },
+  "Collection 4": { label: "4", bg: "bg-cyan-100", text: "text-cyan-700", border: "border-cyan-300", title: "Winter Songs" },
+  "Collection 5": { label: "5", bg: "bg-rose-100", text: "text-rose-700", border: "border-rose-300", title: "Christmas Tree" },
+  "Collection 6": { label: "6", bg: "bg-amber-100", text: "text-amber-700", border: "border-amber-300", title: "Fun Jazzy Songs" },
+  "Collection 7": { label: "7", bg: "bg-indigo-100", text: "text-indigo-700", border: "border-indigo-300", title: "The Postman's Adventure" },
+  "Collection 8": { label: "8", bg: "bg-emerald-100", text: "text-emerald-700", border: "border-emerald-300", title: "Special Features" }
+};
+
+function getSourceBadge(source) {
+  const conf = deckBadgeMap[source] || { label: "•", bg: "bg-slate-100", text: "text-slate-700", border: "border-slate-300", title: source };
+  return `<span class="inline-flex items-center justify-center w-6 h-6 text-xs font-extrabold rounded-full ${conf.bg} ${conf.text} border ${conf.border}" title="${escapeHtml(conf.title)}">${conf.label}</span>`;
+}
+
+// Mobile Sidebar Toggle
+function toggleMobileSidebar() {
+  const sb = document.getElementById("appSidebar");
+  const bd = document.getElementById("sidebarBackdrop");
+  if (sb && bd) {
+    const isOpen = sb.classList.contains("open");
+    if (isOpen) {
+      sb.classList.remove("open");
+      bd.style.display = "none";
+    } else {
+      sb.classList.add("open");
+      bd.style.display = "block";
+    }
+  }
+}
+
+// Responsive Desktop Viewport Scaling for Google Drive Iframe
+function updateIframeScale() {
+  const wrap = document.getElementById("videoContainerWrap");
+  const iframe = document.getElementById("videoIframe");
+  if (!wrap || !iframe) return;
+
+  if (document.fullscreenElement || document.webkitFullscreenElement) {
+    iframe.style.width = "100%";
+    iframe.style.height = "100%";
+    iframe.style.transform = "none";
+    return;
+  }
+
+  const containerW = wrap.clientWidth;
+  if (!containerW) return;
+
+  // Force Google Drive player to see a 1280px HD desktop viewport
+  const baseW = Math.max(1280, containerW);
+  const baseH = (baseW * 9) / 16;
+  const scale = containerW / baseW;
+
+  iframe.style.width = baseW + "px";
+  iframe.style.height = baseH + "px";
+  iframe.style.transform = "scale(" + scale + ")";
+}
+
+window.addEventListener("resize", () => {
+  updateIframeScale();
+});
+
+// Fullscreen Change Listener: Dynamically toggles button text and icon
+document.addEventListener("fullscreenchange", updateFullscreenButton);
+document.addEventListener("webkitfullscreenchange", updateFullscreenButton);
+
+function updateFullscreenButton() {
+  const isFs = !!(document.fullscreenElement || document.webkitFullscreenElement);
+  const icon = document.getElementById("navFsIcon");
+  const text = document.getElementById("navFsText");
+  if (icon && text) {
+    if (isFs) {
+      icon.textContent = "✕";
+      text.textContent = "Exit Fullscreen";
+    } else {
+      icon.innerHTML = "&#x26F6;";
+      text.textContent = "Fullscreen";
+    }
+  }
+  updateIframeScale();
+}
+
+// Keyboard shortcuts: ESC to return, Left/Right for video navigation
+window.addEventListener("keydown", (e) => {
+  if (document.activeElement && (document.activeElement.tagName === "INPUT" || document.activeElement.tagName === "SELECT")) {
+    return;
+  }
+
+  if (document.getElementById("viewVideo").style.display === "block") {
+    if (e.key === "Escape") {
+      goToCatalog();
+    } else if (e.key === "ArrowLeft") {
+      navigateVideo(-1);
+    } else if (e.key === "ArrowRight") {
+      navigateVideo(1);
+    }
+  }
+});
+
+// Filter & Search Handlers
+function handleSearch(query) {
+  currentSearchQuery = (query || "").trim().toLowerCase();
+  
+  const sbSearch = document.getElementById("sidebarSearch");
+  if (sbSearch && sbSearch.value !== query) {
+    sbSearch.value = query;
+  }
+  
+  const showClear = currentSearchQuery.length > 0;
+  document.getElementById("clearSearchBtn").style.display = showClear ? "flex" : "none";
+  
+  currentPage = 1;
+  applyFilters();
+}
+
+function clearSearch() {
+  const sbSearch = document.getElementById("sidebarSearch");
+  if (sbSearch) sbSearch.value = "";
+  handleSearch("");
+}
+
+function setFilterSource(source) {
+  currentSourceFilter = source;
+  
+  document.querySelectorAll('[id^="tabSource"]').forEach(btn => {
+    const val = btn.getAttribute("data-source") || "all";
+    if (val === source) {
+      btn.className = "w-full flex items-center justify-between px-2.5 py-1 text-xs font-medium rounded-lg bg-emerald-600/20 border-l-2 border-emerald-400 text-emerald-200 transition text-left cursor-pointer";
+    } else {
+      btn.className = "w-full flex items-center justify-between px-2.5 py-1 text-xs font-medium rounded-lg text-emerald-200/75 hover:bg-forest-900 hover:text-white transition text-left cursor-pointer";
+    }
+  });
+
+  currentPage = 1;
+  applyFilters();
+
+  if (window.innerWidth < 1024) toggleMobileSidebar();
+}
+
+function setFilterCategory(cat) {
+  currentCategoryFilter = cat;
+
+  const catAllBtn = document.getElementById("tabCatAll");
+  if (catAllBtn) {
+    if (cat === "all") {
+      catAllBtn.className = "w-full flex items-center justify-between px-2.5 py-1 text-xs font-medium rounded-md text-emerald-300 bg-emerald-600/20 border-l-2 border-emerald-400 text-left transition cursor-pointer";
+    } else {
+      catAllBtn.className = "w-full flex items-center justify-between px-2.5 py-1 text-xs font-medium rounded-md text-emerald-200/75 hover:bg-forest-900 hover:text-white transition text-left cursor-pointer";
+    }
+  }
+
+  document.querySelectorAll('[id^="tabCat_"]').forEach(btn => {
+    const btnCat = btn.id.replace("tabCat_", "");
+    if (btnCat === cat) {
+      btn.className = "w-full flex items-center justify-between px-2.5 py-1 text-xs font-medium rounded-md text-emerald-300 bg-emerald-600/20 border-l-2 border-emerald-400 text-left transition cursor-pointer";
+    } else {
+      btn.className = "w-full flex items-center justify-between px-2.5 py-1 text-xs font-medium rounded-md text-emerald-200/75 hover:bg-forest-900 hover:text-white transition text-left cursor-pointer";
+    }
+  });
+
+  currentPage = 1;
+  applyFilters();
+
+  if (window.innerWidth < 1024) toggleMobileSidebar();
+}
+
+function handleSort(mode) {
+  currentSortMode = mode;
+  applyFilters();
+}
+
+function setViewMode(mode) {
+  currentViewMode = mode;
+  localStorage.setItem("songHub_viewMode", mode);
+
+  const gridContainer = document.getElementById("viewGridCards");
+  const tableContainer = document.getElementById("viewListTable");
+  const btnGrid = document.getElementById("btnViewGrid");
+  const btnList = document.getElementById("btnViewList");
+
+  if (mode === "grid") {
+    gridContainer.style.display = "block";
+    tableContainer.style.display = "none";
+    btnGrid.className = "p-1.5 rounded-lg text-emerald-700 bg-emerald-50 transition font-semibold cursor-pointer";
+    btnList.className = "p-1.5 rounded-lg text-slate-400 hover:text-slate-700 transition cursor-pointer";
+  } else {
+    gridContainer.style.display = "none";
+    tableContainer.style.display = "block";
+    btnGrid.className = "p-1.5 rounded-lg text-slate-400 hover:text-slate-700 transition cursor-pointer";
+    btnList.className = "p-1.5 rounded-lg text-emerald-700 bg-emerald-50 transition font-semibold cursor-pointer";
+  }
+  renderCatalog();
+}
+
+// Apply Filtering & Sorting
+function applyFilters() {
+  filteredSongs = allSongs.filter(s => {
+    if (currentSourceFilter !== "all" && s.source !== currentSourceFilter) return false;
+    if (currentCategoryFilter !== "all" && s.category !== currentCategoryFilter) return false;
+    if (currentSearchQuery) {
+      const matchTitle = s.title.toLowerCase().includes(currentSearchQuery);
+      const matchDesc = s.desc.toLowerCase().includes(currentSearchQuery);
+      const matchCat = s.category.toLowerCase().includes(currentSearchQuery);
+      const matchSrc = s.source.toLowerCase().includes(currentSearchQuery);
+      const matchSrcName = (s.source_name || "").toLowerCase().includes(currentSearchQuery);
+      if (!matchTitle && !matchDesc && !matchCat && !matchSrc && !matchSrcName) return false;
+    }
+    return true;
+  });
+
+  if (currentSortMode === "title_asc") {
+    filteredSongs.sort((a, b) => a.title.localeCompare(b.title));
+  } else if (currentSortMode === "title_desc") {
+    filteredSongs.sort((a, b) => b.title.localeCompare(a.title));
+  } else if (currentSortMode === "category") {
+    filteredSongs.sort((a, b) => a.category.localeCompare(b.category) || a.title.localeCompare(b.title));
+  } else if (currentSortMode === "source") {
+    filteredSongs.sort((a, b) => a.source.localeCompare(b.source) || a.slide_num - b.slide_num);
+  } else {
+    filteredSongs.sort((a, b) => a.id.localeCompare(b.id));
+  }
+
+  const total = allSongs.length;
+  const count = filteredSongs.length;
+  const countTextEl = document.getElementById("resultsCountText");
+  const catLabel = currentCategoryFilter === "all" ? "All Categories" : currentCategoryFilter;
+  
+  let srcLabel = "All Collections";
+  if (currentSourceFilter !== "all") {
+    const matchCol = deckBadgeMap[currentSourceFilter];
+    srcLabel = matchCol ? matchCol.title : currentSourceFilter;
+  }
+
+  if (countTextEl) {
+    countTextEl.textContent = `Showing ${count} of ${total} songs • ${catLabel} • ${srcLabel}`;
+  }
+
+  renderCatalog();
+}
+
+// Render Catalog (Grid or Table with 12 items per page)
+function renderCatalog() {
+  const totalPages = Math.ceil(filteredSongs.length / PAGE_SIZE) || 1;
+  if (currentPage > totalPages) currentPage = totalPages;
+
+  const startIdx = (currentPage - 1) * PAGE_SIZE;
+  const endIdx = startIdx + PAGE_SIZE;
+  const pageItems = filteredSongs.slice(startIdx, endIdx);
+
+  // Render Grid Cards
+  const gridContainer = document.getElementById("gridCardsContainer");
+  if (pageItems.length === 0) {
+    gridContainer.innerHTML = `
+      <div class="col-span-full py-16 text-center text-slate-500 bg-white rounded-2xl border border-slate-200">
+        <div class="text-4xl mb-2">🔍</div>
+        <div class="text-base font-bold text-slate-700">No songs match your search</div>
+        <p class="text-xs text-slate-400 mt-1">Try clearing your search bar or picking another category.</p>
+        <button onclick="clearSearch(); setFilterCategory('all'); setFilterSource('all');" class="mt-4 px-4 py-2 text-xs font-bold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 rounded-xl transition cursor-pointer">
+          Reset All Filters
+        </button>
+      </div>
+    `;
+  } else {
+    gridContainer.innerHTML = pageItems.map(item => `
+      <div onclick="openVideo('${item.id}')" class="card-light-sheen rounded-2xl p-4 sm:p-5 border border-slate-200/90 flex flex-col justify-between hover:shadow-md transition cursor-pointer group">
+        <div>
+          <div class="flex items-center justify-between gap-2 mb-2.5">
+            ${getCategoryBadge(item.category, item.category_icon)}
+            ${getSourceBadge(item.source)}
+          </div>
+
+          <h3 class="font-serif font-bold text-slate-900 text-base sm:text-lg group-hover:text-emerald-700 transition leading-snug mb-2 truncate" title="${escapeHtml(item.title)}">
+            ${escapeHtml(item.title)}
+          </h3>
+
+          <p class="text-slate-500 text-xs leading-relaxed line-clamp-2 mb-3.5" title="${escapeHtml(item.desc)}">
+            ${escapeHtml(item.desc)}
+          </p>
+        </div>
+
+        <div class="pt-2.5 border-t border-slate-100 flex items-center justify-between text-xs">
+          <span class="text-[11px] text-slate-400 font-medium">Slide ${item.slide_num}</span>
+          <div class="flex items-center gap-2" onclick="event.stopPropagation()">
+            <a href="${item.link}" target="_blank" rel="noopener noreferrer" class="p-1.5 text-slate-400 hover:text-slate-700 transition" title="Open External Link">
+              ↗
+            </a>
+            <button onclick="openVideo('${item.id}')" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold bg-emerald-600 text-white hover:bg-emerald-700 active:bg-emerald-800 rounded-lg shadow-2xs transition cursor-pointer">
+              <span>Watch</span>
+              <span class="text-[10px]">▶</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    `).join("");
+  }
+
+  // Render Table Rows (12 single rows)
+  const tableBody = document.getElementById("tableBody");
+  if (pageItems.length === 0) {
+    tableBody.innerHTML = `
+      <tr>
+        <td colspan="6" class="py-12 text-center text-slate-400 text-sm">
+          No songs found matching criteria.
+        </td>
+      </tr>
+    `;
+  } else {
+    tableBody.innerHTML = pageItems.map((item, idx) => `
+      <tr onclick="openVideo('${item.id}')" class="hover:bg-slate-50/80 transition-colors cursor-pointer group h-12 whitespace-nowrap">
+        <td class="py-2.5 pl-4 pr-1 font-mono text-xs text-slate-400 text-center">
+          ${startIdx + idx + 1}
+        </td>
+        <td class="py-2.5 px-3 font-semibold text-slate-900 group-hover:text-emerald-700 transition truncate max-w-[220px]" title="${escapeHtml(item.title)}">
+          ${escapeHtml(item.title)}
+        </td>
+        <td class="py-2.5 px-3 whitespace-nowrap">
+          ${getCategoryBadge(item.category, item.category_icon)}
+        </td>
+        <td class="py-2.5 px-2 text-center">
+          ${getSourceBadge(item.source)}
+        </td>
+        <td class="py-2.5 px-3 text-xs text-slate-500 max-w-sm truncate hidden md:table-cell" title="${escapeHtml(item.desc)}">
+          ${escapeHtml(item.desc)}
+        </td>
+        <td class="py-2.5 pr-5 pl-2 text-right whitespace-nowrap" onclick="event.stopPropagation()">
+          <button onclick="openVideo('${item.id}')" class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-bold bg-emerald-600 text-white hover:bg-emerald-700 rounded-lg shadow-2xs transition cursor-pointer">
+            <span>Watch</span>
+            <span class="text-[10px]">▶</span>
+          </button>
+        </td>
+      </tr>
+    `).join("");
+  }
+
+  renderPaginationBar("gridPagination", totalPages);
+  renderPaginationBar("tablePagination", totalPages);
+}
+
+function renderPaginationBar(containerId, totalPages) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+
+  if (filteredSongs.length === 0) {
+    container.innerHTML = "";
+    return;
+  }
+
+  let pageButtons = "";
+  for (let i = 1; i <= totalPages; i++) {
+    if (i === 1 || i === totalPages || (i >= currentPage - 1 && i <= currentPage + 1)) {
+      const isActive = i === currentPage;
+      pageButtons += `
+        <button onclick="setPage(${i})" class="w-8 h-8 rounded-lg text-xs font-bold transition cursor-pointer ${isActive ? 'bg-emerald-600 text-white shadow-2xs' : 'bg-slate-50 hover:bg-slate-100 text-slate-600 border border-slate-200'}">
+          ${i}
+        </button>
+      `;
+    } else if (i === currentPage - 2 || i === currentPage + 2) {
+      pageButtons += `<span class="px-1 text-slate-300 text-xs select-none">...</span>`;
+    }
+  }
+
+  container.innerHTML = `
+    <div class="text-xs text-slate-500 font-medium select-none">
+      Showing page <span class="font-bold text-slate-800">${currentPage}</span> of <span class="font-bold text-slate-800">${totalPages}</span> (${filteredSongs.length} songs)
+    </div>
+    <div class="flex items-center gap-1.5">
+      <button onclick="setPage(${currentPage - 1})" ${currentPage === 1 ? 'disabled class="px-2.5 py-1 text-xs font-medium text-slate-300 bg-slate-50 rounded-lg border border-slate-200 cursor-not-allowed"' : 'class="px-2.5 py-1 text-xs font-medium text-slate-700 bg-slate-50 hover:bg-slate-100 rounded-lg border border-slate-200 transition cursor-pointer"'}>
+        &larr; Prev
+      </button>
+      ${pageButtons}
+      <button onclick="setPage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled class="px-2.5 py-1 text-xs font-medium text-slate-300 bg-slate-50 rounded-lg border border-slate-200 cursor-not-allowed"' : 'class="px-2.5 py-1 text-xs font-medium text-slate-700 bg-slate-50 hover:bg-slate-100 rounded-lg border border-slate-200 transition cursor-pointer"'}>
+        Next &rarr;
+      </button>
+    </div>
+  `;
+}
+
+function setPage(p) {
+  const totalPages = Math.ceil(filteredSongs.length / PAGE_SIZE) || 1;
+  if (p >= 1 && p <= totalPages) {
+    currentPage = p;
+    renderCatalog();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+}
+
+// ================= VIDEO PLAYER / PREVIEW LOGIC =================
+function openVideo(id) {
+  activeVideo = allSongs.find(s => s.id === id);
+  if (!activeVideo) return;
+
+  document.getElementById("headerSection").style.display = "none";
+  document.getElementById("songsGridSection").style.display = "none";
+  document.getElementById("viewVideo").style.display = "block";
+
+  history.replaceState(null, null, "#video=" + id);
+
+  document.getElementById("videoHeading").textContent = activeVideo.title;
+  document.getElementById("videoDescText").textContent = activeVideo.desc;
+
+  const deckPill = document.getElementById("metaDeckPill");
+  if (deckPill) {
+    const conf = deckBadgeMap[activeVideo.source];
+    deckPill.textContent = conf ? conf.title : activeVideo.source;
+  }
+
+  const slidePill = document.getElementById("metaSlidePill");
+  if (slidePill) slidePill.textContent = `Slide ${activeVideo.slide_num}`;
+
+  const streamPill = document.getElementById("metaStreamPill");
+  if (streamPill) streamPill.textContent = `${activeVideo.provider} Stream`;
+
+  const catBadge = document.getElementById("videoCategoryTag");
+  const catConf = categoryColors[activeVideo.category] || { bg: "bg-emerald-50", text: "text-emerald-700", border: "border-emerald-200" };
+  catBadge.className = `inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-bold rounded-lg ${catConf.bg} ${catConf.text} border ${catConf.border} whitespace-nowrap`;
+  catBadge.textContent = `${activeVideo.category_icon} ${activeVideo.category}`;
+
+  const srcBadge = document.getElementById("videoSourceTag");
+  const conf = deckBadgeMap[activeVideo.source];
+  srcBadge.textContent = conf ? conf.title : activeVideo.source;
+
+  const topExt = document.getElementById("topExternalLink");
+  const directBtn = document.getElementById("directDriveBtn");
+  topExt.href = activeVideo.link;
+  topExt.querySelector("span").textContent = activeVideo.provider === "YouTube" ? "Open on YouTube" : "Open in Drive";
+  directBtn.href = activeVideo.link;
+  directBtn.querySelector("span").textContent = activeVideo.provider === "YouTube" ? "Watch on YouTube" : "Watch on Google Drive";
+
+  const iframe = document.getElementById("videoIframe");
+  if (iframe.src !== activeVideo.embed_url) {
+    iframe.src = activeVideo.embed_url;
+  }
+
+  setTimeout(() => {
+    updateIframeScale();
+  }, 50);
+
+  renderRelatedSongs(activeVideo);
+
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function goToCatalog() {
+  const iframe = document.getElementById("videoIframe");
+  if (iframe) {
+    iframe.src = "about:blank";
+  }
+
+  document.getElementById("viewVideo").style.display = "none";
+  document.getElementById("headerSection").style.display = "block";
+  document.getElementById("songsGridSection").style.display = "block";
+
+  history.replaceState(null, null, window.location.pathname);
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function navigateVideo(direction) {
+  if (!activeVideo) return;
+  const currentList = filteredSongs.length > 0 ? filteredSongs : allSongs;
+  const currentIndex = currentList.findIndex(s => s.id === activeVideo.id);
+  if (currentIndex === -1) return;
+
+  let nextIndex = currentIndex + direction;
+  if (nextIndex < 0) nextIndex = currentList.length - 1;
+  if (nextIndex >= currentList.length) nextIndex = 0;
+
+  openVideo(currentList[nextIndex].id);
+}
+
+function renderRelatedSongs(current) {
+  const relatedContainer = document.getElementById("relatedSongsGrid");
+  const sameCat = allSongs.filter(s => s.category === current.category && s.id !== current.id).slice(0, 3);
+  
+  document.getElementById("relatedCategoryTitle").textContent = `More in ${current.category}`;
+
+  if (sameCat.length === 0) {
+    relatedContainer.innerHTML = `<div class="col-span-full text-xs text-slate-400 italic">No other songs in this category.</div>`;
+    return;
+  }
+
+  relatedContainer.innerHTML = sameCat.map(s => `
+    <div onclick="openVideo('${s.id}')" class="p-3 bg-slate-50 hover:bg-emerald-50/60 rounded-xl border border-slate-200/80 transition cursor-pointer group">
+      <div class="flex items-center justify-between text-[10px] text-slate-400 mb-1">
+        <span>${s.source_name || s.source}</span>
+        <span>Slide ${s.slide_num}</span>
+      </div>
+      <h4 class="font-serif font-bold text-slate-900 group-hover:text-emerald-700 text-xs transition truncate" title="${escapeHtml(s.title)}">${escapeHtml(s.title)}</h4>
+      <p class="text-[11px] text-slate-500 line-clamp-1 mt-0.5" title="${escapeHtml(s.desc)}">${escapeHtml(s.desc)}</p>
+    </div>
+  `).join("");
+}
+
+function filterToCurrentCategory() {
+  if (!activeVideo) return;
+  const cat = activeVideo.category;
+  goToCatalog();
+  setFilterCategory(cat);
+}
+
+function toggleProtectedFullscreen() {
+  const wrap = document.getElementById("videoContainerWrap");
+  if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+    if (wrap.requestFullscreen) {
+      wrap.requestFullscreen();
+    } else if (wrap.webkitRequestFullscreen) {
+      wrap.webkitRequestFullscreen();
+    }
+  } else {
+    if (document.exitFullscreen) {
+      document.exitFullscreen();
+    } else if (document.webkitExitFullscreen) {
+      document.webkitExitFullscreen();
+    }
+  }
+}
+
+function checkUrlHash() {
+  const hash = window.location.hash;
+  if (hash.startsWith("#video=") || hash.startsWith("#video-")) {
+    const vidId = hash.replace("#video=", "").replace("#video-", "");
+    const match = allSongs.find(s => s.id === vidId);
+    if (match) {
+      openVideo(vidId);
+      return;
+    }
+  }
+  goToCatalog();
+}
+
+// Initialize
+window.addEventListener("DOMContentLoaded", () => {
+  setViewMode(currentViewMode);
+  checkUrlHash();
+});
+
+window.addEventListener("popstate", () => {
+  checkUrlHash();
+});
+
+window.addEventListener("hashchange", () => {
+  checkUrlHash();
+});
+</script>
+</body>
+</html>
